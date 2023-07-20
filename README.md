@@ -1,7 +1,7 @@
 # Cyclone Racing Formula SAE
 ## Iowa State University
 
-This Repository stores the C/C++ code for our telemetry system. The system is built off of the ARM MBed platform using STM32 MCUs. This system pulls data from the ECU and other sensors around the car and sends the data in real-time to a wireless receiver as well as logging it locally.
+This Repository stores the C/C++ code for our telemetry system. The system is built off of an STM32H7 MCU and uses the corresponding HAL. This system pulls data from the ECU and other sensors around the car and sends it in real-time to a wireless receiver and logs it locally.
 
 # Links
 - [Linktree](https://linktr.ee/cycloneracing)
