@@ -1,0 +1,9 @@
+main.c:76:5:main	1
+main.c:124:6:SystemClock_Config	4
+main.c:184:13:MX_ADC1_Init	19
+main.c:386:13:MX_FDCAN2_Init	2
+main.c:439:13:MX_FDCAN3_Init	2
+main.c:492:13:MX_USART1_UART_Init	5
+main.c:538:13:MX_DMA_Init	1
+main.c:556:13:MX_GPIO_Init	1
+main.c:579:6:Error_Handler	1
