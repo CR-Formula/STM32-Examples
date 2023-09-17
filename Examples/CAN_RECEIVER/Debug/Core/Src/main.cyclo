@@ -1,0 +1,10 @@
+../Core/Src/main.c:88:6:update_data	4
+../Core/Src/main.c:105:6:HAL_FDCAN_RxFio0Callback	4
+../Core/Src/main.c:133:6:HAL_FDCAN_RxFio1Callback	4
+../Core/Src/main.c:159:5:main	5
+../Core/Src/main.c:245:6:SystemClock_Config	4
+../Core/Src/main.c:303:13:MX_FDCAN1_Init	5
+../Core/Src/main.c:381:13:MX_FDCAN2_Init	2
+../Core/Src/main.c:431:13:MX_GPIO_Init	1
+../Core/Src/main.c:449:6:MPU_Config	1
+../Core/Src/main.c:478:6:Error_Handler	1
