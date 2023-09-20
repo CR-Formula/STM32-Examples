@@ -251,7 +251,7 @@ int main(void) {
         /* USER CODE BEGIN 3 */
 
         // test function replicating the ecu simulatior
-        packet1(100.000, 28.0000, 25.0000, 15.0000);
+        packet1(100.0, 28.0, 25.0, 15.0);
 
         // sends data from test fdcan
         if (HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan2, &TxHeader2, TxData2) !=
