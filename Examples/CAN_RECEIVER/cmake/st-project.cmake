@@ -97,6 +97,8 @@ target_sources(
     "Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_rcc.c"
     "Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_tim_ex.c"
     "Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_tim.c"
+    "Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_uart_ex.c"
+    "Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_uart.c"
     "Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal.c"
 )
 

@@ -18,7 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-
+#include "string.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
@@ -44,17 +44,21 @@
 FDCAN_HandleTypeDef hfdcan1;
 FDCAN_HandleTypeDef hfdcan2;
 
+I2C_HandleTypeDef hi2c1;
+
+UART_HandleTypeDef huart2;
+
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
-void MPU_Initialize(void);
-static void MPU_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_FDCAN1_Init(void);
 static void MX_FDCAN2_Init(void);
+static void MX_I2C1_Init(void);
+static void MX_USART2_UART_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -150,6 +154,21 @@ void HAL_FDCAN_RxFio1Callback(FDCAN_HandleTypeDef *hfdcan2,
         Error_Handler();
     }
 }
+
+// temp fucntion to replicate the ecu sim
+void packet1(double rpm, double tps, double fuelOpenTime,
+             double ignistionAngle) {
+
+    TxData2[0] = (rpm / 2);
+    TxData2[1] = (rpm / 2) / 256;
+    TxData2[2] = tps / 2;
+    TxData2[3] = (tps / 2) / 256;
+    TxData2[4] = fuelOpenTime / 2;
+    TxData2[5] = (fuelOpenTime / 2) / 256;
+    TxData2[6] = ignistionAngle / 2;
+    TxData2[7] = (ignistionAngle / 2) / 256;
+}
+
 /* USER CODE END 0 */
 
 /**
@@ -158,7 +177,6 @@ void HAL_FDCAN_RxFio1Callback(FDCAN_HandleTypeDef *hfdcan2,
  */
 int main(void) {
     /* USER CODE BEGIN 1 */
-
     /* USER CODE END 1 */
 
     /* MCU
@@ -167,10 +185,6 @@ int main(void) {
     /* Reset of all peripherals, Initializes the Flash interface and the
      * Systick. */
     HAL_Init();
-
-    /* MPU
-     * Configuration--------------------------------------------------------*/
-    MPU_Config();
 
     /* USER CODE BEGIN Init */
 
@@ -187,6 +201,8 @@ int main(void) {
     MX_GPIO_Init();
     MX_FDCAN1_Init();
     MX_FDCAN2_Init();
+    MX_I2C1_Init();
+    MX_USART2_UART_Init();
     /* USER CODE BEGIN 2 */
     // initalizes can
     if (HAL_FDCAN_Start(&hfdcan1) != HAL_OK) {
@@ -217,7 +233,7 @@ int main(void) {
     TxHeader1.TxEventFifoControl = FDCAN_NO_TX_EVENTS;
     TxHeader1.MessageMarker = 0;
 
-    TxHeader2.Identifier = 0x0C24048;
+    TxHeader2.Identifier = 0x0CFF048;
     TxHeader2.IdType = FDCAN_EXTENDED_ID;
     TxHeader2.TxFrameType = FDCAN_DATA_FRAME;
     TxHeader2.DataLength = FDCAN_DATA_BYTES_8;
@@ -232,8 +248,33 @@ int main(void) {
     /* USER CODE BEGIN WHILE */
     while (1) {
         /* USER CODE END WHILE */
-
         /* USER CODE BEGIN 3 */
+
+        // test function replicating the ecu simulatior
+        packet1(100.000, 28.0000, 25.0000, 15.0000);
+
+        // sends data from test fdcan
+        if (HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan2, &TxHeader2, TxData2) !=
+            HAL_OK) {
+            Error_Handler();
+        }
+        HAL_Delay(1000);
+
+        // test the RXdata1 (data buffer that will recive data from main can)
+        //        HAL_UART_Transmit(&huart2, RxData1, 8,
+        //                          HAL_MAX_DELAY);
+
+        // test the telemptry struct
+        HAL_UART_Transmit(&huart2, (uint8_t *)telemetry.rpm,
+                          sizeof((uint8_t *)telemetry.rpm), HAL_MAX_DELAY);
+        HAL_UART_Transmit(&huart2, (uint8_t *)telemetry.tps,
+                          sizeof((uint8_t *)telemetry.tps), HAL_MAX_DELAY);
+        HAL_UART_Transmit(&huart2, (uint8_t *)telemetry.fuelOpenTime,
+                          sizeof((uint8_t *)telemetry.fuelOpenTime),
+                          HAL_MAX_DELAY);
+        HAL_UART_Transmit(&huart2, (uint8_t *)telemetry.ignistionAngle,
+                          sizeof((uint8_t *)telemetry.ignistionAngle),
+                          HAL_MAX_DELAY);
     }
     /* USER CODE END 3 */
 }
@@ -286,7 +327,7 @@ void SystemClock_Config(void) {
     RCC_ClkInitStruct.SYSCLKDivider = RCC_SYSCLK_DIV1;
     RCC_ClkInitStruct.AHBCLKDivider = RCC_HCLK_DIV1;
     RCC_ClkInitStruct.APB3CLKDivider = RCC_APB3_DIV1;
-    RCC_ClkInitStruct.APB1CLKDivider = RCC_APB1_DIV1;
+    RCC_ClkInitStruct.APB1CLKDivider = RCC_APB1_DIV2;
     RCC_ClkInitStruct.APB2CLKDivider = RCC_APB2_DIV1;
     RCC_ClkInitStruct.APB4CLKDivider = RCC_APB4_DIV1;
 
@@ -419,8 +460,107 @@ static void MX_FDCAN2_Init(void) {
         Error_Handler();
     }
     /* USER CODE BEGIN FDCAN2_Init 2 */
+    FDCAN_FilterTypeDef sFilterConfig;
 
+    sFilterConfig.IdType = FDCAN_EXTENDED_ID;
+    sFilterConfig.FilterIndex = 0;
+    sFilterConfig.FilterType = FDCAN_FILTER_MASK;
+    sFilterConfig.FilterConfig = FDCAN_FILTER_TO_RXFIFO1;
+    sFilterConfig.FilterID1 = 0x1FFFFFFF;
+    sFilterConfig.FilterID2 = 0x1FFFFFFF;
+
+    if (HAL_FDCAN_ConfigFilter(&hfdcan1, &sFilterConfig) != HAL_OK) {
+        Error_Handler();
+    }
     /* USER CODE END FDCAN2_Init 2 */
+}
+
+/**
+ * @brief I2C1 Initialization Function
+ * @param None
+ * @retval None
+ */
+static void MX_I2C1_Init(void) {
+
+    /* USER CODE BEGIN I2C1_Init 0 */
+
+    /* USER CODE END I2C1_Init 0 */
+
+    /* USER CODE BEGIN I2C1_Init 1 */
+
+    /* USER CODE END I2C1_Init 1 */
+    hi2c1.Instance = I2C1;
+    hi2c1.Init.Timing = 0x00707CBB;
+    hi2c1.Init.OwnAddress1 = 0;
+    hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
+    hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
+    hi2c1.Init.OwnAddress2 = 0;
+    hi2c1.Init.OwnAddress2Masks = I2C_OA2_NOMASK;
+    hi2c1.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
+    hi2c1.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
+    if (HAL_I2C_Init(&hi2c1) != HAL_OK) {
+        Error_Handler();
+    }
+
+    /** Configure Analogue filter
+     */
+    if (HAL_I2CEx_ConfigAnalogFilter(&hi2c1, I2C_ANALOGFILTER_ENABLE) !=
+        HAL_OK) {
+        Error_Handler();
+    }
+
+    /** Configure Digital filter
+     */
+    if (HAL_I2CEx_ConfigDigitalFilter(&hi2c1, 0) != HAL_OK) {
+        Error_Handler();
+    }
+    /* USER CODE BEGIN I2C1_Init 2 */
+
+    /* USER CODE END I2C1_Init 2 */
+}
+
+/**
+ * @brief USART2 Initialization Function
+ * @param None
+ * @retval None
+ */
+static void MX_USART2_UART_Init(void) {
+
+    /* USER CODE BEGIN USART2_Init 0 */
+
+    /* USER CODE END USART2_Init 0 */
+
+    /* USER CODE BEGIN USART2_Init 1 */
+
+    /* USER CODE END USART2_Init 1 */
+    huart2.Instance = USART2;
+    huart2.Init.BaudRate = 115200;
+    huart2.Init.WordLength = UART_WORDLENGTH_8B;
+    huart2.Init.StopBits = UART_STOPBITS_1;
+    huart2.Init.Parity = UART_PARITY_NONE;
+    huart2.Init.Mode = UART_MODE_TX_RX;
+    huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+    huart2.Init.OverSampling = UART_OVERSAMPLING_16;
+    huart2.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
+    huart2.Init.ClockPrescaler = UART_PRESCALER_DIV1;
+    huart2.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
+    if (HAL_UART_Init(&huart2) != HAL_OK) {
+        Error_Handler();
+    }
+    if (HAL_UARTEx_SetTxFifoThreshold(&huart2, UART_TXFIFO_THRESHOLD_1_8) !=
+        HAL_OK) {
+        Error_Handler();
+    }
+    if (HAL_UARTEx_SetRxFifoThreshold(&huart2, UART_RXFIFO_THRESHOLD_1_8) !=
+        HAL_OK) {
+        Error_Handler();
+    }
+    if (HAL_UARTEx_DisableFifoMode(&huart2) != HAL_OK) {
+        Error_Handler();
+    }
+    /* USER CODE BEGIN USART2_Init 2 */
+
+    /* USER CODE END USART2_Init 2 */
 }
 
 /**
@@ -433,8 +573,8 @@ static void MX_GPIO_Init(void) {
     /* USER CODE END MX_GPIO_Init_1 */
 
     /* GPIO Ports Clock Enable */
-    __HAL_RCC_GPIOB_CLK_ENABLE();
     __HAL_RCC_GPIOA_CLK_ENABLE();
+    __HAL_RCC_GPIOB_CLK_ENABLE();
 
     /* USER CODE BEGIN MX_GPIO_Init_2 */
     /* USER CODE END MX_GPIO_Init_2 */
@@ -443,33 +583,6 @@ static void MX_GPIO_Init(void) {
 /* USER CODE BEGIN 4 */
 
 /* USER CODE END 4 */
-
-/* MPU Configuration */
-
-void MPU_Config(void) {
-    MPU_Region_InitTypeDef MPU_InitStruct = {0};
-
-    /* Disables the MPU */
-    HAL_MPU_Disable();
-
-    /** Initializes and configures the Region and the memory to be protected
-     */
-    MPU_InitStruct.Enable = MPU_REGION_ENABLE;
-    MPU_InitStruct.Number = MPU_REGION_NUMBER0;
-    MPU_InitStruct.BaseAddress = 0x0;
-    MPU_InitStruct.Size = MPU_REGION_SIZE_4GB;
-    MPU_InitStruct.SubRegionDisable = 0x87;
-    MPU_InitStruct.TypeExtField = MPU_TEX_LEVEL0;
-    MPU_InitStruct.AccessPermission = MPU_REGION_NO_ACCESS;
-    MPU_InitStruct.DisableExec = MPU_INSTRUCTION_ACCESS_DISABLE;
-    MPU_InitStruct.IsShareable = MPU_ACCESS_SHAREABLE;
-    MPU_InitStruct.IsCacheable = MPU_ACCESS_NOT_CACHEABLE;
-    MPU_InitStruct.IsBufferable = MPU_ACCESS_NOT_BUFFERABLE;
-
-    HAL_MPU_ConfigRegion(&MPU_InitStruct);
-    /* Enables the MPU */
-    HAL_MPU_Enable(MPU_PRIVILEGED_DEFAULT);
-}
 
 /**
  * @brief  This function is executed in case of error occurrence.
