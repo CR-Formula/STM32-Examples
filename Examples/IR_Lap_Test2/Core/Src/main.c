@@ -23,16 +23,15 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-uint32_t lapTimer(uint8_t lapNumber);
 void printer(uint32_t runTime, uint8_t lapNumber);
 void messanger(char* message);
 
-uint8_t runTimeDatabase[255];
-uint8_t alrPrint;
+
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -78,6 +77,10 @@ PCD_HandleTypeDef hpcd_USB_OTG_FS;
 
 /* USER CODE BEGIN PV */
 
+uint8_t lapNumber = 1;
+uint8_t bestLap = 1;
+uint32_t bestTime = 99999999;
+uint8_t runTimeDatabase[255];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -133,16 +136,15 @@ int main(void)
   MX_I2C1_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-uint8_t lapNumber = 1;
+
+
+HAL_TIM_Base_Start_IT(&htim2);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 while (1)
 {
-	uint32_t runTime = lapTimer(lapNumber);
-	printer(runTime, lapNumber);
-	lapNumber++;
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -326,7 +328,7 @@ static void MX_TIM2_Init(void)
 
   /* USER CODE END TIM2_Init 1 */
   htim2.Instance = TIM2;
-  htim2.Init.Prescaler = 64-1;
+  htim2.Init.Prescaler = 64000-1;
   htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim2.Init.Period = 4294967295;
   htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -522,7 +524,7 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pin : PF0 */
   GPIO_InitStruct.Pin = GPIO_PIN_0;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
 
@@ -553,21 +555,15 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(LD2_GPIO_Port, &GPIO_InitStruct);
 
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI0_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI0_IRQn);
+
 /* USER CODE BEGIN MX_GPIO_Init_2 */
 /* USER CODE END MX_GPIO_Init_2 */
 }
 
 /* USER CODE BEGIN 4 */
-uint32_t lapTimer(uint8_t lapNumber){
-	alrPrint = 0;
-	while(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_10) == 0){if(alrPrint == 0){messanger("Get on start line...");}}
-	while(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_10) == 1){if(alrPrint == 1){messanger("On start line...");}}
-	HAL_TIM_Base_Start_IT(&htim2);
-	while(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_10) == 0){if(alrPrint == 2){messanger("Driving...");}}
-	uint32_t runTime = (__HAL_TIM_GET_COUNTER(&htim2))/1000;
-	runTimeDatabase[lapNumber - 1] = runTime;
-	return runTime;
-}
 void printer(uint32_t runTime, uint8_t lapNumber){
 	uint8_t minutes = runTime/60000;
 	uint8_t seconds = (runTime%60000)/1000;
@@ -580,7 +576,19 @@ void messanger(char* message){
 	char buf[255];
 	sprintf(buf, "%s\r\n", message);
 	HAL_UART_Transmit(&huart3, buf, strlen(buf), HAL_MAX_DELAY);
-	alrPrint++;
+	HAL_Delay(1);
+}
+void HAL_GPIO_EXTI_Callback ( uint16_t GPIO_Pin ){
+	uint32_t runTime = (__HAL_TIM_GET_COUNTER(&htim2));
+	runTimeDatabase[lapNumber - 1] = runTime;
+	printer(runTime, lapNumber);
+	if(runTime < bestTime){
+		bestTime = runTime;
+		bestLap = lapNumber;
+	}
+	HAL_TIM_Base_Start_IT(&htim2);
+	lapNumber++;
+	messanger("Starting\n");
 }
 /* USER CODE END 4 */
 
