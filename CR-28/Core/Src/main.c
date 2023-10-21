@@ -21,7 +21,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define ADC_BUFFER_SIZE 64
+#define ADC_BUFFER_SIZE 128 // Use a larger value to decimate ADC data
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -53,7 +53,7 @@ volatile int adcConvFlag = 0; // DMA Conversion flag for Analog Converters
 char debug[64]; // String to hold UART Messages for debug
 
 char message[64]; // String to hold UART messages to control the HMI Display
-char HMIEnd[64] = "0xff"; // End Command for HMI Serial Control
+char HMIEnd[4] = "0xff"; // End Command for HMI Serial Control
 
 /* Data Struct to hold Telem Data*/
 typedef struct data_struct {
