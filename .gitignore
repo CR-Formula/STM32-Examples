@@ -1,2 +1,7 @@
 
 .metadata/
+.vs/
+.vscode/
+.settings/
+Examples/CAN_Test/.settings/
+Examples/DMA_ADC/.settings/
