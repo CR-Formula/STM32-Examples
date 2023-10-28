@@ -12,6 +12,6 @@
 ../Core/Src/main.c:866:13:MX_USART3_UART_Init	5
 ../Core/Src/main.c:912:13:MX_DMA_Init	1
 ../Core/Src/main.c:930:13:MX_GPIO_Init	1
-../Core/Src/main.c:985:6:HAL_ADC_ConvCpltCallback	1
-../Core/Src/main.c:989:6:HMICMD	2
-../Core/Src/main.c:1000:6:Error_Handler	1
+../Core/Src/main.c:986:6:HAL_ADC_ConvCpltCallback	1
+../Core/Src/main.c:991:6:HMICMD	2
+../Core/Src/main.c:1002:6:Error_Handler	1

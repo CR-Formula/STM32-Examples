@@ -11,7 +11,7 @@
 ../Core/Src/main.c:818:13:MX_USART2_UART_Init	8	static
 ../Core/Src/main.c:866:13:MX_USART3_UART_Init	8	static
 ../Core/Src/main.c:912:13:MX_DMA_Init	16	static
-../Core/Src/main.c:930:13:MX_GPIO_Init	56	static
-../Core/Src/main.c:985:6:HAL_ADC_ConvCpltCallback	16	static
-../Core/Src/main.c:989:6:HMICMD	16	static
-../Core/Src/main.c:1000:6:Error_Handler	4	static,ignoring_inline_asm
+../Core/Src/main.c:930:13:MX_GPIO_Init	64	static
+../Core/Src/main.c:986:6:HAL_ADC_ConvCpltCallback	16	static
+../Core/Src/main.c:991:6:HMICMD	16	static
+../Core/Src/main.c:1002:6:Error_Handler	4	static,ignoring_inline_asm
