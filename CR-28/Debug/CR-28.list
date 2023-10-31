@@ -1589,7 +1589,7 @@ static void MX_I2C1_Init(void)
  8000d7a:	f000 fb21 	bl	80013c0 <Error_Handler>
   }
 
-  /** Configure Analogue filter
+  /** Configure Analog filter
   */
   if (HAL_I2CEx_ConfigAnalogFilter(&hi2c1, I2C_ANALOGFILTER_ENABLE) != HAL_OK)
  8000d7e:	2100      	movs	r1, #0

@@ -71,6 +71,12 @@ PCD_HandleTypeDef hpcd_USB_OTG_FS;
 
 /* USER CODE BEGIN PV */
 
+FDCAN_RxHeaderTypeDef RxHeader; // Rx Header Struct Page 535 HAL
+uint8_t RxData[8]; // Stores Rx Data
+
+FDCAN_TxHeaderTypeDef TxHeader; // Tx Header Struct Page 533 HAL
+uint8_t TxData[8]; // Stores Tx Data
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -125,16 +131,50 @@ int main(void)
   MX_FDCAN2_Init();
   /* USER CODE BEGIN 2 */
 
+  /* Prepare Tx Header */
+  TxHeader.Identifier = 0x321;								// CAN ID ~Page 563
+  TxHeader.IdType = FDCAN_STANDARD_ID;
+  TxHeader.TxFrameType = FDCAN_DATA_FRAME;					// Sets the data frame
+  TxHeader.DataLength = FDCAN_DLC_BYTES_8;					// Sets the data size to 8
+  TxHeader.ErrorStateIndicator = FDCAN_ESI_ACTIVE;
+  TxHeader.BitRateSwitch = FDCAN_BRS_OFF;
+  TxHeader.FDFormat = FDCAN_CLASSIC_CAN;					// Sets to classic CAN Message
+  TxHeader.TxEventFifoControl = FDCAN_NO_TX_EVENTS;
+  TxHeader.MessageMarker = 0;
+
+  uint8_t count = '0';
+
+  if (HAL_FDCAN_Start(&hfdcan1) != HAL_OK) {
+      Error_Handler();
+    }
+
+  if (HAL_FDCAN_Start(&hfdcan2) != HAL_OK) {
+        Error_Handler();
+      }
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    /* USER CODE END WHILE */
-	  if(HAL_FDCAN__IsRxBufferMessageAvailable) {
-		  HAL_FDCAN_GetRxMessage();
+	  if(HAL_FDCAN_IsRxBufferMessageAvailable(&hfdcan2, count) == '1') { // Checks for a new CAN Message
+	  		  HAL_FDCAN_GetRxMessage(&hfdcan2, FDCAN_RX_FIFO0, &RxHeader, RxData); // Gets the new CAN Message
+	  		  count++;
 	  }
+
+	  	  HAL_Delay(1000);
+
+	  	  TxData[0]++;
+	  	  TxData[1]+=2;
+
+	  	  HAL_UART_Transmit(&huart3, &TxData[0], sizeof(TxData[0]), HAL_MAX_DELAY);
+
+	  if(HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader, TxData) != HAL_OK) { // Adds a new CAN message to the TX Fifo TRIGGERS HAL_FDCAN_ERROR_PARAM
+	  		  Error_Handler(); // If the message fails, kick to Error Handler
+	  }
+    /* USER CODE END WHILE */
+
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
@@ -518,6 +558,9 @@ void Error_Handler(void)
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
   __disable_irq();
+  uint8_t eMessage[16];
+  sprintf(eMessage, "Error\n");
+  HAL_UART_Transmit(&huart3, eMessage, sizeof(eMessage), HAL_MAX_DELAY);
   while (1)
   {
   }
