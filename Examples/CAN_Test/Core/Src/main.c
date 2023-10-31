@@ -198,7 +198,7 @@ int main(void)
 		  Error_Handler();
 	  }
 
-	  HAL_Delay (1000);
+	  HAL_Delay (1000); // Delay for 1 Second
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -598,7 +598,8 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-// FDCAN2 Callback
+
+// FDCAN2 Callback for interrupt
 void HAL_FDCAN_RxFifo1Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo1ITs)
 {
   if((RxFifo1ITs & FDCAN_IT_RX_FIFO1_NEW_MESSAGE) != RESET)
@@ -625,7 +626,7 @@ void HAL_FDCAN_RxFifo1Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo1ITs)
   }
 }
 
-// FDCAN1 Callback
+// FDCAN1 Callback for interrupt
 void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
 {
   if((RxFifo0ITs & FDCAN_IT_RX_FIFO0_NEW_MESSAGE) != RESET)
