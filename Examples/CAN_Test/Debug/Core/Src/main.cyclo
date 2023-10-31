@@ -1,9 +1,9 @@
 ../Core/Src/main.c:103:5:main	5
 ../Core/Src/main.c:187:6:SystemClock_Config	4
 ../Core/Src/main.c:248:13:MX_ETH_Init	2
-../Core/Src/main.c:297:13:MX_FDCAN1_Init	2
-../Core/Src/main.c:350:13:MX_FDCAN2_Init	2
-../Core/Src/main.c:403:13:MX_USART3_UART_Init	5
-../Core/Src/main.c:451:13:MX_USB_OTG_FS_PCD_Init	2
-../Core/Src/main.c:487:13:MX_GPIO_Init	1
-../Core/Src/main.c:556:6:Error_Handler	1
+../Core/Src/main.c:297:13:MX_FDCAN1_Init	3
+../Core/Src/main.c:363:13:MX_FDCAN2_Init	2
+../Core/Src/main.c:416:13:MX_USART3_UART_Init	5
+../Core/Src/main.c:464:13:MX_USB_OTG_FS_PCD_Init	2
+../Core/Src/main.c:500:13:MX_GPIO_Init	1
+../Core/Src/main.c:569:6:Error_Handler	1
