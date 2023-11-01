@@ -199,6 +199,11 @@ int main(void)
 	  }
 
 	  HAL_Delay (1000); // Delay for 1 Second
+
+	  if(HAL_FDCAN_IsRxBufferMessageAvailable(&hfdcan2, 0) == '1') { // Checks for a new CAN Message
+		  HAL_FDCAN_GetRxMessage(&hfdcan2, FDCAN_RX_FIFO0, &RxHeader2, RxData2); // Gets the new CAN Message
+		  HAL_UART_Transmit_IT(&huart3, RxData2[8], sizeof(RxData2[8]));
+	  }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -221,7 +226,7 @@ void SystemClock_Config(void)
 
   /** Configure the main internal regulator output voltage
   */
-  __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE2);
+  __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE3);
 
   while(!__HAL_PWR_GET_FLAG(PWR_FLAG_VOSRDY)) {}
 
@@ -235,13 +240,13 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
   RCC_OscInitStruct.PLL.PLLM = 1;
-  RCC_OscInitStruct.PLL.PLLN = 24;
+  RCC_OscInitStruct.PLL.PLLN = 18;
   RCC_OscInitStruct.PLL.PLLP = 2;
-  RCC_OscInitStruct.PLL.PLLQ = 4;
+  RCC_OscInitStruct.PLL.PLLQ = 3;
   RCC_OscInitStruct.PLL.PLLR = 2;
   RCC_OscInitStruct.PLL.PLLRGE = RCC_PLL1VCIRANGE_3;
-  RCC_OscInitStruct.PLL.PLLVCOSEL = RCC_PLL1VCOWIDE;
-  RCC_OscInitStruct.PLL.PLLFRACN = 0;
+  RCC_OscInitStruct.PLL.PLLVCOSEL = RCC_PLL1VCOMEDIUM;
+  RCC_OscInitStruct.PLL.PLLFRACN = 6144;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();
@@ -256,7 +261,7 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.SYSCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_HCLK_DIV1;
   RCC_ClkInitStruct.APB3CLKDivider = RCC_APB3_DIV1;
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_APB1_DIV1;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_APB1_DIV2;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_APB2_DIV1;
   RCC_ClkInitStruct.APB4CLKDivider = RCC_APB4_DIV1;
 
@@ -327,16 +332,6 @@ static void MX_FDCAN1_Init(void)
 
 	FDCAN_FilterTypeDef sFilterConfig;
 
-	sFilterConfig.IdType = FDCAN_STANDARD_ID;
-	sFilterConfig.FilterIndex = 0;
-	sFilterConfig.FilterType = FDCAN_FILTER_MASK;
-	sFilterConfig.FilterConfig = FDCAN_FILTER_TO_RXFIFO0; // Send the data to FIFO 0
-	sFilterConfig.FilterID1 = 0x22;
-	sFilterConfig.FilterID2 = 0x22;
-	sFilterConfig.RxBufferIndex = 0;
-	if (HAL_FDCAN_ConfigFilter(&hfdcan1, &sFilterConfig) != HAL_OK) {
-		Error_Handler();
-	}
 
   /* USER CODE END FDCAN1_Init 0 */
 
@@ -349,16 +344,16 @@ static void MX_FDCAN1_Init(void)
   hfdcan1.Init.AutoRetransmission = ENABLE;
   hfdcan1.Init.TransmitPause = DISABLE;
   hfdcan1.Init.ProtocolException = DISABLE;
-  hfdcan1.Init.NominalPrescaler = 16;
+  hfdcan1.Init.NominalPrescaler = 1;
   hfdcan1.Init.NominalSyncJumpWidth = 13;
-  hfdcan1.Init.NominalTimeSeg1 = 2;
-  hfdcan1.Init.NominalTimeSeg2 = 2;
+  hfdcan1.Init.NominalTimeSeg1 = 86;
+  hfdcan1.Init.NominalTimeSeg2 = 13;
   hfdcan1.Init.DataPrescaler = 25;
   hfdcan1.Init.DataSyncJumpWidth = 1;
   hfdcan1.Init.DataTimeSeg1 = 2;
   hfdcan1.Init.DataTimeSeg2 = 1;
   hfdcan1.Init.MessageRAMOffset = 0;
-  hfdcan1.Init.StdFiltersNbr = 0;
+  hfdcan1.Init.StdFiltersNbr = 1;
   hfdcan1.Init.ExtFiltersNbr = 0;
   hfdcan1.Init.RxFifo0ElmtsNbr = 1;
   hfdcan1.Init.RxFifo0ElmtSize = FDCAN_DATA_BYTES_8;
@@ -377,6 +372,17 @@ static void MX_FDCAN1_Init(void)
   }
   /* USER CODE BEGIN FDCAN1_Init 2 */
 
+  	sFilterConfig.IdType = FDCAN_STANDARD_ID;
+  	sFilterConfig.FilterIndex = 0;
+  	sFilterConfig.FilterType = FDCAN_FILTER_MASK;
+  	sFilterConfig.FilterConfig = FDCAN_FILTER_TO_RXFIFO0; // Send the data to FIFO 0
+  	sFilterConfig.FilterID1 = 0x22;
+  	sFilterConfig.FilterID2 = 0x22;
+  	sFilterConfig.RxBufferIndex = 0;
+  	if (HAL_FDCAN_ConfigFilter(&hfdcan1, &sFilterConfig) != HAL_OK) {
+  		Error_Handler();
+  	}
+
   /* USER CODE END FDCAN1_Init 2 */
 
 }
@@ -393,17 +399,6 @@ static void MX_FDCAN2_Init(void)
 
 	FDCAN_FilterTypeDef sFilterConfig;
 
-	sFilterConfig.IdType = FDCAN_STANDARD_ID;
-	sFilterConfig.FilterIndex = 0;
-	sFilterConfig.FilterType = FDCAN_FILTER_MASK;
-	sFilterConfig.FilterConfig = FDCAN_FILTER_TO_RXFIFO1; // Send the Data to FIFO 1
-	sFilterConfig.FilterID1 = 0x11;
-	sFilterConfig.FilterID2 = 0x11;
-	sFilterConfig.RxBufferIndex = 0;
-	if (HAL_FDCAN_ConfigFilter(&hfdcan2, &sFilterConfig) != HAL_OK) {
-	  Error_Handler();
-	}
-
   /* USER CODE END FDCAN2_Init 0 */
 
   /* USER CODE BEGIN FDCAN2_Init 1 */
@@ -415,10 +410,10 @@ static void MX_FDCAN2_Init(void)
   hfdcan2.Init.AutoRetransmission = ENABLE;
   hfdcan2.Init.TransmitPause = DISABLE;
   hfdcan2.Init.ProtocolException = DISABLE;
-  hfdcan2.Init.NominalPrescaler = 16;
+  hfdcan2.Init.NominalPrescaler = 1;
   hfdcan2.Init.NominalSyncJumpWidth = 13;
-  hfdcan2.Init.NominalTimeSeg1 = 2;
-  hfdcan2.Init.NominalTimeSeg2 = 2;
+  hfdcan2.Init.NominalTimeSeg1 = 86;
+  hfdcan2.Init.NominalTimeSeg2 = 13;
   hfdcan2.Init.DataPrescaler = 25;
   hfdcan2.Init.DataSyncJumpWidth = 1;
   hfdcan2.Init.DataTimeSeg1 = 2;
@@ -442,6 +437,17 @@ static void MX_FDCAN2_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN FDCAN2_Init 2 */
+
+  	sFilterConfig.IdType = FDCAN_STANDARD_ID;
+  	sFilterConfig.FilterIndex = 0;
+  	sFilterConfig.FilterType = FDCAN_FILTER_MASK;
+  	sFilterConfig.FilterConfig = FDCAN_FILTER_TO_RXFIFO1; // Send the Data to FIFO 1
+  	sFilterConfig.FilterID1 = 0x11;
+  	sFilterConfig.FilterID2 = 0x11;
+  	sFilterConfig.RxBufferIndex = 0;
+  	if (HAL_FDCAN_ConfigFilter(&hfdcan2, &sFilterConfig) != HAL_OK) {
+  	  Error_Handler();
+  	}
 
   /* USER CODE END FDCAN2_Init 2 */
 
