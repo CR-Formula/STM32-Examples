@@ -23,7 +23,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
-#include <stdio.h>
+#include "stdio.h"
 
 /* USER CODE END Includes */
 
@@ -86,7 +86,7 @@ FDCAN_RxHeaderTypeDef   RxHeader2; // RX Control for FDCAN 2
 uint8_t               TxData2[8]; // Stores CAN2 TX Data
 uint8_t               RxData2[8]; // Stores CAN2 RX Data
 
-uint8_t indx = '0';
+int indx = 0;
 
 /* USER CODE END PV */
 
@@ -104,6 +104,53 @@ static void MX_FDCAN2_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
+// FDCAN1 Callback for interrupt
+void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
+{
+  if((RxFifo0ITs & FDCAN_IT_RX_FIFO0_NEW_MESSAGE) != RESET)
+  {
+    /* Retrieve Rx messages from RX FIFO0 */
+    if (HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO0, &RxHeader1, RxData1) != HAL_OK)
+    {
+    /* Reception Error */
+    Error_Handler();
+    }
+
+    if (HAL_FDCAN_ActivateNotification(hfdcan, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, 0) != HAL_OK)
+    {
+      /* Notification Error */
+      Error_Handler();
+    }
+  }
+}
+
+// FDCAN2 Callback for interrupt
+void HAL_FDCAN_RxFifo1Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo1ITs)
+{
+  if((RxFifo1ITs & FDCAN_IT_RX_FIFO1_NEW_MESSAGE) != RESET)
+  {
+    /* Retrieve Rx messages from RX FIFO0 */
+    if (HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO1, &RxHeader2, RxData2) != HAL_OK)
+    {
+    /* Reception Error */
+    Error_Handler();
+    }
+
+    if (HAL_FDCAN_ActivateNotification(hfdcan, FDCAN_IT_RX_FIFO1_NEW_MESSAGE, 0) != HAL_OK)
+    {
+      /* Notification Error */
+      Error_Handler();
+    }
+
+	  sprintf ((char *)TxData2, "CAN2 %d", indx++);
+
+	  if (HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan2, &TxHeader2, TxData2)!= HAL_OK)
+	  {
+		  Error_Handler();
+	  }
+  }
+}
 
 /* USER CODE END 0 */
 
@@ -152,13 +199,13 @@ int main(void)
 	  Error_Handler();
   }
 
-  // Activate the notification for new data in FIFO0 for FDCAN1
+  // Activate the notification for new data in FIFO0 for FDCAN1 which triggers the Interrupt
   if (HAL_FDCAN_ActivateNotification(&hfdcan1, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, 0) != HAL_OK) {
 	  Error_Handler();
   }
 
 
-  // Activate the notification for new data in FIFO1 for FDCAN2
+  // Activate the notification for new data in FIFO1 for FDCAN2 which triggers the Interrupt
   if (HAL_FDCAN_ActivateNotification(&hfdcan2, FDCAN_IT_RX_FIFO1_NEW_MESSAGE, 0) != HAL_OK) {
 	  Error_Handler();
   }
@@ -193,17 +240,17 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  sprintf ((char *)TxData1, "CAN1TX %d", indx++); // Add data to the TX Buffer
+	  sprintf ((char *)TxData1, "CAN1 %d", indx++); // Add data to the TX Buffer
 	  if (HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader1, TxData1)!= HAL_OK) { // Add the message to the TX Queue and send it
 		  Error_Handler();
 	  }
 
 	  HAL_Delay (1000); // Delay for 1 Second
 
-	  if(HAL_FDCAN_IsRxBufferMessageAvailable(&hfdcan2, 0) == '1') { // Checks for a new CAN Message
-		  HAL_FDCAN_GetRxMessage(&hfdcan2, FDCAN_RX_FIFO0, &RxHeader2, RxData2); // Gets the new CAN Message
-		  HAL_UART_Transmit_IT(&huart3, RxData2[8], sizeof(RxData2[8]));
-	  }
+//	  if(HAL_FDCAN_IsRxBufferMessageAvailable(&hfdcan2, 0) == '1') { // Checks for a new CAN Message
+//		  HAL_FDCAN_GetRxMessage(&hfdcan2, FDCAN_RX_FIFO0, &RxHeader2, RxData2); // Gets the new CAN Message
+//		  HAL_UART_Transmit_IT(&huart3, RxData2[8], sizeof(RxData2[8]));
+//	  }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -330,9 +377,6 @@ static void MX_FDCAN1_Init(void)
 
   /* USER CODE BEGIN FDCAN1_Init 0 */
 
-	FDCAN_FilterTypeDef sFilterConfig;
-
-
   /* USER CODE END FDCAN1_Init 0 */
 
   /* USER CODE BEGIN FDCAN1_Init 1 */
@@ -372,16 +416,18 @@ static void MX_FDCAN1_Init(void)
   }
   /* USER CODE BEGIN FDCAN1_Init 2 */
 
-  	sFilterConfig.IdType = FDCAN_STANDARD_ID;
-  	sFilterConfig.FilterIndex = 0;
-  	sFilterConfig.FilterType = FDCAN_FILTER_MASK;
-  	sFilterConfig.FilterConfig = FDCAN_FILTER_TO_RXFIFO0; // Send the data to FIFO 0
-  	sFilterConfig.FilterID1 = 0x22;
-  	sFilterConfig.FilterID2 = 0x22;
-  	sFilterConfig.RxBufferIndex = 0;
-  	if (HAL_FDCAN_ConfigFilter(&hfdcan1, &sFilterConfig) != HAL_OK) {
-  		Error_Handler();
-  	}
+  FDCAN_FilterTypeDef sFilterConfig;
+
+  sFilterConfig.IdType = FDCAN_STANDARD_ID;
+  sFilterConfig.FilterIndex = 0;
+  sFilterConfig.FilterType = FDCAN_FILTER_MASK;
+  sFilterConfig.FilterConfig = FDCAN_FILTER_TO_RXFIFO0; // Send the data to FIFO 0
+  sFilterConfig.FilterID1 = 0x22;
+  sFilterConfig.FilterID2 = 0x22;
+  sFilterConfig.RxBufferIndex = 0;
+  if (HAL_FDCAN_ConfigFilter(&hfdcan1, &sFilterConfig) != HAL_OK) {
+  	Error_Handler();
+  }
 
   /* USER CODE END FDCAN1_Init 2 */
 
@@ -396,8 +442,6 @@ static void MX_FDCAN2_Init(void)
 {
 
   /* USER CODE BEGIN FDCAN2_Init 0 */
-
-	FDCAN_FilterTypeDef sFilterConfig;
 
   /* USER CODE END FDCAN2_Init 0 */
 
@@ -438,16 +482,18 @@ static void MX_FDCAN2_Init(void)
   }
   /* USER CODE BEGIN FDCAN2_Init 2 */
 
-  	sFilterConfig.IdType = FDCAN_STANDARD_ID;
-  	sFilterConfig.FilterIndex = 0;
-  	sFilterConfig.FilterType = FDCAN_FILTER_MASK;
-  	sFilterConfig.FilterConfig = FDCAN_FILTER_TO_RXFIFO1; // Send the Data to FIFO 1
-  	sFilterConfig.FilterID1 = 0x11;
-  	sFilterConfig.FilterID2 = 0x11;
-  	sFilterConfig.RxBufferIndex = 0;
-  	if (HAL_FDCAN_ConfigFilter(&hfdcan2, &sFilterConfig) != HAL_OK) {
-  	  Error_Handler();
-  	}
+  FDCAN_FilterTypeDef sFilterConfig;
+
+  sFilterConfig.IdType = FDCAN_STANDARD_ID;
+  sFilterConfig.FilterIndex = 0;
+  sFilterConfig.FilterType = FDCAN_FILTER_MASK;
+  sFilterConfig.FilterConfig = FDCAN_FILTER_TO_RXFIFO1; // Send the Data to FIFO 1
+  sFilterConfig.FilterID1 = 0x11;
+  sFilterConfig.FilterID2 = 0x11;
+  sFilterConfig.RxBufferIndex = 0;
+  if (HAL_FDCAN_ConfigFilter(&hfdcan2, &sFilterConfig) != HAL_OK) {
+    Error_Handler();
+  }
 
   /* USER CODE END FDCAN2_Init 2 */
 
@@ -605,52 +651,6 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
-// FDCAN2 Callback for interrupt
-void HAL_FDCAN_RxFifo1Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo1ITs)
-{
-  if((RxFifo1ITs & FDCAN_IT_RX_FIFO1_NEW_MESSAGE) != RESET)
-  {
-    /* Retreive Rx messages from RX FIFO0 */
-    if (HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO1, &RxHeader2, RxData2) != HAL_OK)
-    {
-    /* Reception Error */
-    Error_Handler();
-    }
-
-    if (HAL_FDCAN_ActivateNotification(hfdcan, FDCAN_IT_RX_FIFO1_NEW_MESSAGE, 0) != HAL_OK)
-    {
-      /* Notification Error */
-      Error_Handler();
-    }
-
-	  sprintf ((char *)TxData2, "CAN2TX %d", indx++);
-
-	  if (HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan2, &TxHeader2, TxData2)!= HAL_OK)
-	  {
-		  Error_Handler();
-	  }
-  }
-}
-
-// FDCAN1 Callback for interrupt
-void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
-{
-  if((RxFifo0ITs & FDCAN_IT_RX_FIFO0_NEW_MESSAGE) != RESET)
-  {
-    /* Retreive Rx messages from RX FIFO0 */
-    if (HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO0, &RxHeader1, RxData1) != HAL_OK)
-    {
-    /* Reception Error */
-    Error_Handler();
-    }
-
-    if (HAL_FDCAN_ActivateNotification(hfdcan, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, 0) != HAL_OK)
-    {
-      /* Notification Error */
-      Error_Handler();
-    }
-  }
-}
 /* USER CODE END 4 */
 
 /**
