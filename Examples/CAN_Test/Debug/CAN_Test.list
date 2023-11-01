@@ -606,7 +606,7 @@ int main(void)
  800077e:	f000 fba7 	bl	8000ed0 <Error_Handler>
 	  }
 
-	  HAL_Delay (1000);
+	  HAL_Delay (1000); // Delay for 1 Second
  8000782:	f44f 707a 	mov.w	r0, #1000	; 0x3e8
  8000786:	f001 f82f 	bl	80017e8 <HAL_Delay>
 	  sprintf ((char *)TxData1, "CAN1TX %d", indx++); // Add data to the TX Buffer
@@ -1687,7 +1687,8 @@ static void MX_GPIO_Init(void)
 08000df4 <HAL_FDCAN_RxFifo1Callback>:
 
 /* USER CODE BEGIN 4 */
-// FDCAN2 Callback
+
+// FDCAN2 Callback for interrupt
 void HAL_FDCAN_RxFifo1Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo1ITs)
 {
  8000df4:	b580      	push	{r7, lr}
@@ -1771,7 +1772,7 @@ void HAL_FDCAN_RxFifo1Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo1ITs)
 
 08000e80 <HAL_FDCAN_RxFifo0Callback>:
 
-// FDCAN1 Callback
+// FDCAN1 Callback for interrupt
 void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
 {
  8000e80:	b580      	push	{r7, lr}
