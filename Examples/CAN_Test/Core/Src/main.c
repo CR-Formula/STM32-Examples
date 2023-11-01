@@ -246,11 +246,6 @@ int main(void)
 	  }
 
 	  HAL_Delay (1000); // Delay for 1 Second
-
-//	  if(HAL_FDCAN_IsRxBufferMessageAvailable(&hfdcan2, 0) == '1') { // Checks for a new CAN Message
-//		  HAL_FDCAN_GetRxMessage(&hfdcan2, FDCAN_RX_FIFO0, &RxHeader2, RxData2); // Gets the new CAN Message
-//		  HAL_UART_Transmit_IT(&huart3, RxData2[8], sizeof(RxData2[8]));
-//	  }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -423,7 +418,7 @@ static void MX_FDCAN1_Init(void)
   sFilterConfig.FilterType = FDCAN_FILTER_MASK;
   sFilterConfig.FilterConfig = FDCAN_FILTER_TO_RXFIFO0; // Send the data to FIFO 0
   sFilterConfig.FilterID1 = 0x22;
-  sFilterConfig.FilterID2 = 0x22;
+  sFilterConfig.FilterID2 = 0x11;
   sFilterConfig.RxBufferIndex = 0;
   if (HAL_FDCAN_ConfigFilter(&hfdcan1, &sFilterConfig) != HAL_OK) {
   	Error_Handler();
@@ -469,7 +464,7 @@ static void MX_FDCAN2_Init(void)
   hfdcan2.Init.RxFifo0ElmtSize = FDCAN_DATA_BYTES_8;
   hfdcan2.Init.RxFifo1ElmtsNbr = 1;
   hfdcan2.Init.RxFifo1ElmtSize = FDCAN_DATA_BYTES_8;
-  hfdcan2.Init.RxBuffersNbr = 0;
+  hfdcan2.Init.RxBuffersNbr = 1;
   hfdcan2.Init.RxBufferSize = FDCAN_DATA_BYTES_8;
   hfdcan2.Init.TxEventsNbr = 0;
   hfdcan2.Init.TxBuffersNbr = 0;
@@ -489,7 +484,7 @@ static void MX_FDCAN2_Init(void)
   sFilterConfig.FilterType = FDCAN_FILTER_MASK;
   sFilterConfig.FilterConfig = FDCAN_FILTER_TO_RXFIFO1; // Send the Data to FIFO 1
   sFilterConfig.FilterID1 = 0x11;
-  sFilterConfig.FilterID2 = 0x11;
+  sFilterConfig.FilterID2 = 0x22;
   sFilterConfig.RxBufferIndex = 0;
   if (HAL_FDCAN_ConfigFilter(&hfdcan2, &sFilterConfig) != HAL_OK) {
     Error_Handler();
