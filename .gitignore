@@ -5,3 +5,7 @@
 .settings/
 Examples/CAN_Test/.settings/
 Examples/DMA_ADC/.settings/
+cmake/
+CMakeLists.txt
+CMakePresets.json
+vcpkg-configuration.json
