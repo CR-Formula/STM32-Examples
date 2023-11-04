@@ -129,6 +129,7 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
+	  HAL_FDCAN_GetRxMessage();
 
     /* USER CODE BEGIN 3 */
   }
