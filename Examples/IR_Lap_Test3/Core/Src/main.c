@@ -32,6 +32,8 @@ void printer(uint32_t runTime, uint8_t lapNumber);
 void messanger(char* message);
 void EXTI0_IRQHandler(void);
 
+
+//GLOBAL VARIABLES FOR KEEPING TRACK OF BEST TIME AND LAP ASWELL AS LAP NUMBER
 uint32_t lapNumber = 1;
 uint32_t bestLap = 1;
 uint32_t bestTime = 99999999;
@@ -128,7 +130,8 @@ int main(void)
   MX_USB_OTG_FS_PCD_Init();
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
-HAL_TIM_Base_Start_IT(&htim2);
+  //START THE TIMER FOR THE FIRST LAP
+  HAL_TIM_Base_Start_IT(&htim2);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -458,6 +461,7 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+//PRINTS THE LAP NUMBER AND TIME IT TOOK TO RUN THAT LAP WHEN GIVEN THE TIME AND LAPNUMBER
 void printer(uint32_t runTime, uint8_t lapNumber){
 	uint8_t minutes = runTime/60000;
 	uint8_t seconds = (runTime%60000)/1000;
@@ -466,11 +470,15 @@ void printer(uint32_t runTime, uint8_t lapNumber){
 	sprintf(buf, "Lap #%u:	%u minutes, %u seconds, %u milliseconds\r\n", lapNumber, minutes, seconds, milliseconds);
 	HAL_UART_Transmit(&huart3, buf, strlen(buf), HAL_MAX_DELAY);
 }
+//PRINTS ANY MESSAGE I NEED, MOSTLY FOR DEBUGGING
 void messanger(char* message){
 	char buf[255];
 	sprintf(buf, "%s\r\n", message);
 	HAL_UART_Transmit(&huart3, buf, strlen(buf), HAL_MAX_DELAY);
 }
+//INTERRUPT THAT HAPPENS WHENEVER THE SENSOR RECIEVES IR INPUT
+//IT ENDS AND PRINTS THE TIME AS WELL AS SAVES BEST TIME AND LAP
+//ONLY RUNS IF THE TIME OF THE LAP WAS GREATER THAN 3 SECONDS
 void HAL_GPIO_EXTI_Callback ( uint16_t GPIO_Pin ){
 	uint32_t runTime = (__HAL_TIM_GET_COUNTER(&htim2));
 	if(runTime >= 3000){
@@ -483,7 +491,6 @@ void HAL_GPIO_EXTI_Callback ( uint16_t GPIO_Pin ){
 		__HAL_TIM_SET_COUNTER(&htim2, 0);
 		HAL_TIM_Base_Start_IT(&htim2);
 		lapNumber++;
-		messanger("Starting\n");
 	}
 }
 /* USER CODE END 4 */
