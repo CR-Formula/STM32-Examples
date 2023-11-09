@@ -101,7 +101,7 @@ int main(void)
   TxHeader1.Identifier = 0x11;
   TxHeader1.IdType = FDCAN_STANDARD_ID;
   TxHeader1.TxFrameType = FDCAN_DATA_FRAME;
-  TxHeader1.DataLength = FDCAN_DLC_BYTES_12;
+  TxHeader1.DataLength = FDCAN_DLC_BYTES_8;
   TxHeader1.ErrorStateIndicator = FDCAN_ESI_ACTIVE;
   TxHeader1.BitRateSwitch = FDCAN_BRS_OFF;
   TxHeader1.FDFormat = FDCAN_FD_CAN;
@@ -111,7 +111,7 @@ int main(void)
   TxHeader2.Identifier = 0x22;
   TxHeader2.IdType = FDCAN_STANDARD_ID;
   TxHeader2.TxFrameType = FDCAN_DATA_FRAME;
-  TxHeader2.DataLength = FDCAN_DLC_BYTES_12;
+  TxHeader2.DataLength = FDCAN_DLC_BYTES_8;
   TxHeader2.ErrorStateIndicator = FDCAN_ESI_ACTIVE;
   TxHeader2.BitRateSwitch = FDCAN_BRS_OFF;
   TxHeader2.FDFormat = FDCAN_FD_CAN;
