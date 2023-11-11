@@ -23,6 +23,10 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
+#include "stdio.h"
+#include "Driver_CAN.h"
+
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -147,12 +151,8 @@ int main(void)
   /* We should never get here as control is now taken by the scheduler */
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  while (1)
-  {
     /* USER CODE END WHILE */
-
     /* USER CODE BEGIN 3 */
-  }
   /* USER CODE END 3 */
 }
 
@@ -337,7 +337,7 @@ void StartBlink01(void *argument)
   /* Infinite loop */
   for(;;)
   {
-	  HAL_GPIO_TogglePin(GPIOB, GPIO_Pin_0);
+	  HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
 	  osDelay(400);
   }
 
@@ -359,7 +359,7 @@ void StartBlink02(void *argument)
   /* Infinite loop */
   for(;;)
   {
-	  HAL_GPIO_TogglePin(GPIOB, GPIO_Pin_0);
+	  HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
 	  osDelay(600);
   }
 
