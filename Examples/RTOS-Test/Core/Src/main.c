@@ -24,8 +24,6 @@
 /* USER CODE BEGIN Includes */
 
 #include "stdio.h"
-#include "Driver_CAN.h"
-
 
 /* USER CODE END Includes */
 
@@ -359,7 +357,7 @@ void StartBlink02(void *argument)
   /* Infinite loop */
   for(;;)
   {
-	  HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
+	  HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_14);
 	  osDelay(600);
   }
 
