@@ -2,6 +2,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "cmsis_os.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -29,6 +30,27 @@ FDCAN_HandleTypeDef hfdcan2;
 
 UART_HandleTypeDef huart3;
 
+/* Definitions for CAN_Read */
+osThreadId_t CAN_ReadHandle;
+const osThreadAttr_t CAN_Read_attributes = {
+  .name = "CAN_Read",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityNormal,
+};
+/* Definitions for CAN_Write */
+osThreadId_t CAN_WriteHandle;
+const osThreadAttr_t CAN_Write_attributes = {
+  .name = "CAN_Write",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityNormal,
+};
+/* Definitions for StatusLED */
+osThreadId_t StatusLEDHandle;
+const osThreadAttr_t StatusLED_attributes = {
+  .name = "StatusLED",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityLow,
+};
 /* USER CODE BEGIN PV */
 FDCAN_TxHeaderTypeDef TxHeader1;
 FDCAN_RxHeaderTypeDef RxHeader1;
@@ -53,6 +75,10 @@ static void MX_GPIO_Init(void);
 static void MX_USART3_UART_Init(void);
 static void MX_FDCAN1_Init(void);
 static void MX_FDCAN2_Init(void);
+void read_CAN(void *argument);
+void write_CAN(void *argument);
+void Status_LED(void *argument);
+
 /* USER CODE BEGIN PFP */
 /* USER CODE END PFP */
 
@@ -90,95 +116,63 @@ int main(void)
   MX_FDCAN2_Init();
   /* USER CODE BEGIN 2 */
 
-  if (HAL_FDCAN_Start(&hfdcan1) != HAL_OK) {
-  	  Error_Handler();
-    }
+  	FDCAN1->CCCR = FDCAN_CCCR_TXP; // Sets TXP bit to 1
+  	FDCAN1->NBTP = (15UL << FDCAN_NBTP_NTSEG1_Pos); // UL marked as Unsigned Long
+  	FDCAN1->CCCR = FDCAN_CCCR_NISO; // Sets NISO bit to 1
 
-  if(HAL_FDCAN_Start(&hfdcan2)!= HAL_OK) {
-	  Error_Handler();
-  }
-
-  TxHeader1.Identifier = 0x11;
-  TxHeader1.IdType = FDCAN_STANDARD_ID;
-  TxHeader1.TxFrameType = FDCAN_DATA_FRAME;
-  TxHeader1.DataLength = FDCAN_DLC_BYTES_8;
-  TxHeader1.ErrorStateIndicator = FDCAN_ESI_ACTIVE;
-  TxHeader1.BitRateSwitch = FDCAN_BRS_OFF;
-  TxHeader1.FDFormat = FDCAN_FD_CAN;
-  TxHeader1.TxEventFifoControl = FDCAN_NO_TX_EVENTS;
-  TxHeader1.MessageMarker = 0;
-
-  TxHeader2.Identifier = 0x22;
-  TxHeader2.IdType = FDCAN_STANDARD_ID;
-  TxHeader2.TxFrameType = FDCAN_DATA_FRAME;
-  TxHeader2.DataLength = FDCAN_DLC_BYTES_8;
-  TxHeader2.ErrorStateIndicator = FDCAN_ESI_ACTIVE;
-  TxHeader2.BitRateSwitch = FDCAN_BRS_OFF;
-  TxHeader2.FDFormat = FDCAN_FD_CAN;
-  TxHeader2.TxEventFifoControl = FDCAN_NO_TX_EVENTS;
-  TxHeader2.MessageMarker = 0;
-
-
-  FDCAN_FilterTypeDef sFilterConfig1;
-
-  sFilterConfig1.IdType = FDCAN_STANDARD_ID;
-  sFilterConfig1.FilterIndex = 0;
-  sFilterConfig1.FilterType = FDCAN_FILTER_MASK;
-  sFilterConfig1.FilterConfig = FDCAN_FILTER_TO_RXFIFO0;
-  sFilterConfig1.FilterID1 = 0x22;
-  sFilterConfig1.FilterID2 = 0x22;
-  sFilterConfig1.RxBufferIndex = 0;
-  if (HAL_FDCAN_ConfigFilter(&hfdcan1, &sFilterConfig1) != HAL_OK)
-  {
-    /* Filter configuration Error */
-    Error_Handler();
-  }
-
-  FDCAN_FilterTypeDef sFilterConfig2;
-
-  sFilterConfig2.IdType = FDCAN_STANDARD_ID;
-  sFilterConfig2.FilterIndex = 0;
-  sFilterConfig2.FilterType = FDCAN_FILTER_MASK;
-  sFilterConfig2.FilterConfig = FDCAN_FILTER_TO_RXFIFO1;
-  sFilterConfig2.FilterID1 = 0x11;
-  sFilterConfig2.FilterID2 = 0x11;
-  sFilterConfig2.RxBufferIndex = 0;
-  if (HAL_FDCAN_ConfigFilter(&hfdcan2, &sFilterConfig2) != HAL_OK)
-  {
-    /* Filter configuration Error */
-    Error_Handler();
-  }
-
-  // Activate the notification for new data in FIFO0 for FDCAN1
-  if (HAL_FDCAN_ActivateNotification(&hfdcan1, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, 0) != HAL_OK)
-  {
-    /* Notification Error */
-    Error_Handler();
-  }
-
-  // Activate the notification for new data in FIFO1 for FDCAN2
-  if (HAL_FDCAN_ActivateNotification(&hfdcan2, FDCAN_IT_RX_FIFO1_NEW_MESSAGE, 0) != HAL_OK)
-  {
-    /* Notification Error */
-    Error_Handler();
-  }
+  	/* Config order
+  	 * Clocks
+  	 * Bit timing
+  	 * Global receive -- try with everything first
+  	 * CCCR register --> enable FDCAN
+  	 */
 
   /* USER CODE END 2 */
 
+  /* Init scheduler */
+  osKernelInitialize();
+
+  /* USER CODE BEGIN RTOS_MUTEX */
+  /* add mutexes, ... */
+  /* USER CODE END RTOS_MUTEX */
+
+  /* USER CODE BEGIN RTOS_SEMAPHORES */
+  /* add semaphores, ... */
+  /* USER CODE END RTOS_SEMAPHORES */
+
+  /* USER CODE BEGIN RTOS_TIMERS */
+  /* start timers, add new ones, ... */
+  /* USER CODE END RTOS_TIMERS */
+
+  /* USER CODE BEGIN RTOS_QUEUES */
+  /* add queues, ... */
+  /* USER CODE END RTOS_QUEUES */
+
+  /* Create the thread(s) */
+  /* creation of CAN_Read */
+  CAN_ReadHandle = osThreadNew(read_CAN, NULL, &CAN_Read_attributes);
+
+  /* creation of CAN_Write */
+  CAN_WriteHandle = osThreadNew(write_CAN, NULL, &CAN_Write_attributes);
+
+  /* creation of StatusLED */
+  StatusLEDHandle = osThreadNew(Status_LED, NULL, &StatusLED_attributes);
+
+  /* USER CODE BEGIN RTOS_THREADS */
+  /* add threads, ... */
+  /* USER CODE END RTOS_THREADS */
+
+  /* USER CODE BEGIN RTOS_EVENTS */
+  /* add events, ... */
+  /* USER CODE END RTOS_EVENTS */
+
+  /* Start scheduler */
+  osKernelStart();
+
+  /* We should never get here as control is now taken by the scheduler */
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  while (1) {
-	  sprintf((char *)TxData1, "CAN1 %d", indx++);
-
-	  if (HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader1, TxData1)!= HAL_OK) {
-		  Error_Handler();
-	  }
-//	  else {
-//		  HAL_FDCAN_AbortTxRequest(&hfdcan1, FDCAN_TX_BUFFER0);
-//	  }
-
-	  HAL_Delay (1000);
-  }
+  while (1) {}
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -512,55 +506,84 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
-// FDCAN2 Callback
-void HAL_FDCAN_RxFifo1Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo1ITs)
-{
-  if((RxFifo1ITs & FDCAN_IT_RX_FIFO1_NEW_MESSAGE) != RESET)
-  {
-    /* Retreive Rx messages from RX FIFO0 */
-    if (HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO1, &RxHeader2, RxData2) != HAL_OK)
-    {
-    /* Reception Error */
-    Error_Handler();
-    }
-
-    if (HAL_FDCAN_ActivateNotification(hfdcan, FDCAN_IT_RX_FIFO1_NEW_MESSAGE, 0) != HAL_OK)
-    {
-      /* Notification Error */
-      Error_Handler();
-    }
-
-	  sprintf((char *)TxData2, "CAN2 %d", indx++);
-
-	  if (HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan2, &TxHeader2, TxData2)!= HAL_OK)
-	  {
-		  Error_Handler();
-	  }
-  }
-}
-
-
-// FDCAN1 Callback
-void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
-{
-  if((RxFifo0ITs & FDCAN_IT_RX_FIFO0_NEW_MESSAGE) != RESET)
-  {
-    /* Retreive Rx messages from RX FIFO0 */
-    if (HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO0, &RxHeader1, RxData1) != HAL_OK)
-    {
-    /* Reception Error */
-    Error_Handler();
-    }
-
-    if (HAL_FDCAN_ActivateNotification(hfdcan, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, 0) != HAL_OK)
-    {
-      /* Notification Error */
-      Error_Handler();
-    }
-  }
-}
-
 /* USER CODE END 4 */
+
+/* USER CODE BEGIN Header_read_CAN */
+/**
+  * @brief  Function implementing the CAN_Read thread.
+  * @param  argument: Not used
+  * @retval None
+  */
+/* USER CODE END Header_read_CAN */
+void read_CAN(void *argument)
+{
+  /* USER CODE BEGIN 5 */
+  /* Infinite loop */
+  for(;;) {
+	  HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
+	  osDelay(400);
+  }
+  osThreadTerminate(NULL);
+  /* USER CODE END 5 */
+}
+
+/* USER CODE BEGIN Header_write_CAN */
+/**
+* @brief Function implementing the CAN_Write thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_write_CAN */
+void write_CAN(void *argument)
+{
+  /* USER CODE BEGIN write_CAN */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END write_CAN */
+}
+
+/* USER CODE BEGIN Header_Status_LED */
+/**
+* @brief Function implementing the StatusLED thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_Status_LED */
+void Status_LED(void *argument)
+{
+  /* USER CODE BEGIN Status_LED */
+  /* Infinite loop */
+	for(;;) {
+		HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_1);
+		osDelay(500);
+	}
+	osThreadTerminate(NULL);
+  /* USER CODE END Status_LED */
+}
+
+/**
+  * @brief  Period elapsed callback in non blocking mode
+  * @note   This function is called  when TIM7 interrupt took place, inside
+  * HAL_TIM_IRQHandler(). It makes a direct call to HAL_IncTick() to increment
+  * a global variable "uwTick" used as application time base.
+  * @param  htim : TIM handle
+  * @retval None
+  */
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+  /* USER CODE BEGIN Callback 0 */
+
+  /* USER CODE END Callback 0 */
+  if (htim->Instance == TIM7) {
+    HAL_IncTick();
+  }
+  /* USER CODE BEGIN Callback 1 */
+
+  /* USER CODE END Callback 1 */
+}
 
 /**
   * @brief  This function is executed in case of error occurrence.
