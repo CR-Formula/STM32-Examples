@@ -31,6 +31,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+// Buffer Size for ADC
 #define ADC_BUFFER_SIZE 64
 /* USER CODE END PD */
 
