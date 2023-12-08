@@ -8,10 +8,11 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "cmsis_os.h"
+#include "cmsis_os2.h"
 #include "stm32h743xx.h"
 
 /* Definitions for defaultTask */
+// Test Task for ADC Functionality
 osThreadId_t defaultTaskHandle;
 const osThreadAttr_t defaultTask_attributes = {
   .name = "defaultTask",
@@ -69,7 +70,7 @@ int main(void)
   Error_Handler();
   /* Infinite loop */
   while (1) {
-
+    // Put Thread code in Thread Functions
   }
 }
 
@@ -82,15 +83,16 @@ void SystemClock_Config(void)
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
 
-  /** Supply configuration update enable
-  */
+  /** Supply configuration update enable*/
   HAL_PWREx_ConfigSupply(PWR_LDO_SUPPLY);
 
   /** Configure the main internal regulator output voltage
   */
   __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE3);
 
-  while(!__HAL_PWR_GET_FLAG(PWR_FLAG_VOSRDY)) {}
+  // TODO: Remove once Tested************
+  // while(!__HAL_PWR_GET_FLAG(PWR_FLAG_VOSRDY)) {} (Original HAL Code)
+  while(!(PWR->CSR1 & PWR_CSR1_ACTVOSRDY_Msk)) {} // Check for VOSRDY flag
 
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
@@ -241,8 +243,7 @@ static void MX_GPIO_Init(void)
 void StartDefaultTask(void *argument)
 {
   /* Infinite loop */
-  for(;;)
-  {
+  for(;;) {
     osDelay(1);
   }
 }
@@ -270,8 +271,7 @@ void Error_Handler(void)
 {
   /* Error_Handler_Debug */
   __disable_irq();
-  while (1)
-  {
+  while (1) {
   }
 }
 
