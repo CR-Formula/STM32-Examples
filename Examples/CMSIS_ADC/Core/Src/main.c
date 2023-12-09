@@ -1,18 +1,22 @@
 /**
   ******************************************************************************
   * @file           : main.c
-  * @brief          : Main program body
+  * @brief          : Program to test Bare Metal Register Programming ADCs w/ DMA
   * @author         : Alex Bashara
   * @author         : Cyclone Racing
+  * @note           : Code Built for Nucleo Test Board
   ******************************************************************************/
 
-/* Includes ------------------------------------------------------------------*/
+/* Includes */
 #include "main.h"
 #include "cmsis_os2.h"
 #include "stm32h743xx.h"
 
-/* Definitions for defaultTask */
-// Test Task for ADC Functionality
+/* Create RTOS Threads */
+/**
+ * @brief Basic Test Thread for RTOS
+ * @retval None
+ */
 osThreadId_t defaultTaskHandle;
 const osThreadAttr_t defaultTask_attributes = {
   .name = "defaultTask",
@@ -20,14 +24,51 @@ const osThreadAttr_t defaultTask_attributes = {
   .priority = (osPriority_t) osPriorityNormal,
 };
 
+/**
+ * @brief Thread for ADC Usage
+ * @retval None
+ */
+osThreadId_t adcTaskHandle;
+const osThreadAttr_t adcTask_attributes = {
+  .name = "adcTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityNormal,
+};
 
-/* Private function prototypes -----------------------------------------------*/
+
+/* Private Function Prototypes */
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 void StartDefaultTask(void *argument);
 
 /**
-  * @brief  The application entry point.
+  * @brief  Function implementing the defaultTask thread.
+  * @param  argument: Not used
+  * @retval None
+  */
+void StartDefaultTask(void *argument)
+{
+  /* Infinite loop */
+  for(;;) {
+    osDelay(1);
+  }
+}
+
+/**
+ * @brief Function to read from ADC
+ * @param argument: Not used
+ * @retval None
+ */
+void StartADCTask(void *argument)
+{
+  /* Infinite loop */
+  for(;;) {
+    osDelay(1);
+  }
+}
+
+/**
+  * @brief  Function to Initialize the MCU
   * @retval int
   */
 int main(void)
@@ -55,8 +96,8 @@ int main(void)
   /* BEGIN RTOS_QUEUES */
 
   /* Create the thread(s) */
-  /* creation of defaultTask */
   defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
+  adcTaskHandle = osThreadNew(StartADCTask, NULL, &adcTask_attributes);
 
   /* BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -234,19 +275,6 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_Init(LD2_GPIO_Port, &GPIO_InitStruct);
 }
 
-/* Header_StartDefaultTask */
-/**
-  * @brief  Function implementing the defaultTask thread.
-  * @param  argument: Not used
-  * @retval None
-  */
-void StartDefaultTask(void *argument)
-{
-  /* Infinite loop */
-  for(;;) {
-    osDelay(1);
-  }
-}
 
 /**
   * @brief  Period elapsed callback in non blocking mode
