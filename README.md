@@ -12,6 +12,9 @@ These are the required tools to develop and build this code
 - [Arm-Toolchain](https://developer.arm.com/downloads/-/gnu-rm) -- Arm Compiler used by Make
 - [Cortex Debug](https://marketplace.visualstudio.com/items?itemName=marus25.cortex-debug) -- Used for debugging in VSCode
 - [Keil Extension](https://marketplace.visualstudio.com/items?itemName=Arm.keil-studio-pack) -- VSCode Cortex Development Extensions
+- [STM32 Programmer](https://www.st.com/en/development-tools/stm32cubeprog.html) -- STM32 Programmer Software
+
+Install all of the above tools for your operating system and make sure to add CMake and ARM none-eabi-gcc toolchain to your PATH. Once installed, you should be able to open an SMT32 Make project in VSCode without errors. In order to build your code, open w64dev.exe and cd into the project directory. Once in the project directory, run the command make. This will create a build directory and creat the .elf file that will be used to program the board. The .elf file is used in STM32CubeProgrammer to load the code onto the boards.
 
 # Links
 - [Linktree](https://linktr.ee/cycloneracing)
