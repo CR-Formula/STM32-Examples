@@ -69,6 +69,7 @@ void StartADCTask(void *argument)
 
 /**
   * @brief  Function to Initialize the MCU
+  * @note Basiclly calls Peripherial Initialization Functions
   * @retval int
   */
 int main(void)
