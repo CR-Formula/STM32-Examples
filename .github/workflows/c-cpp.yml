@@ -16,8 +16,10 @@ jobs:
       # - name: cd Dir
       #   run: cd /CR-28
 
-      - name: Install build essentials
-        run: sudo apt-get update && sudo apt-get install -y build-essential
+      - name: Install ARM Toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-arm-none-eabi binutils-arm-none-eabi
 
       - name: Build with make
         run: make
