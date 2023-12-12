@@ -13,16 +13,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: cd Dir
-        run: cd CR_28
-
       - name: Install ARM Toolchain
         run: |
           sudo apt-get update
           sudo apt-get install -y gcc-arm-none-eabi binutils-arm-none-eabi
 
       - name: Build with make
-        run: make
+        run: |
+          cd CR_28
+          make
 
       # - name: Run checks
       #   run: make TODO: Add more checks
