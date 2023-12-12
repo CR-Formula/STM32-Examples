@@ -13,8 +13,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: cd Dir
-        run: cd /CR-28
+      # - name: cd Dir
+      #   run: cd /CR-28
 
       - name: Install build essentials
         run: sudo apt-get update && sudo apt-get install -y build-essential
