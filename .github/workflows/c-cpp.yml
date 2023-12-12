@@ -13,8 +13,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      # - name: cd Dir
-      #   run: cd /CR-28
+      - name: cd Dir
+        run: cd /CR_28
 
       - name: Install ARM Toolchain
         run: |
