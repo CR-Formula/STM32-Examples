@@ -1,3 +1,0 @@
-C:/Users/alexb/Documents/Telem/CR-28/build/debug/build/CMakeFiles/rebuild_cache.dir
-C:/Users/alexb/Documents/Telem/CR-28/build/debug/build/CMakeFiles/CR-28.dir
-C:/Users/alexb/Documents/Telem/CR-28/build/debug/build/CMakeFiles/edit_cache.dir
