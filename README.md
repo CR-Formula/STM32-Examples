@@ -1,7 +1,7 @@
 # Cyclone Racing Formula SAE
 ## Iowa State University
 
-This Repository stores the C/C++ code for our telemetry system. The system is built off of an STM32H7 MCU. This system pulls data from the ECU and other sensors around the car and sends it in real-time to a wireless receiver, and logs it locally. The system uses FreeRTOS to schedule telemetry-related tasks as well as ARM's CMSIS files to interface with registers. Most of the example code is built for a NUCLEO test board, while the actual system runs a custom PCB with a different STM32 MCU.
+This Repository stores the C/C++ code for our telemetry system. The system is built off of an STM32H7 MCU. This system pulls data from the ECU and other sensors around the car and sends it in real-time to a wireless receiver, and logs it locally. The system uses FreeRTOS to schedule telemetry-related tasks as well as ARM's CMSIS files to interface with registers. Most of the example code is built for a NUCLEO test board, while the actual system runs a custom PCB with a slightly different STM32 MCU.
 
 ## Dev and Build Tools
 These are the required tools to develop and build this code
