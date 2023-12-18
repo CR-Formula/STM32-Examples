@@ -26,7 +26,7 @@ These are the required tools to develop and build this code. The instructions fo
 The first thing to install should be VSCode. This will be the IDE that code gets written into. Next, you should go about installing arm-none-eabi-gcc. Make sure that you add this to your PATH when promtped during setup. CMake is the next utility to install. The installation wizard for this should be fairly simple, just make sure that you add this tool to your PATH variable as well. The third program is STM32Cube Programmer. This piece of software allows you to upload code to the boards using the ST-Link USB device. These programs are all basic windows installers. 
 In order to install WSL, open a windows Powershell terminal as administrator and run the command `WSL --install`. This will start the download and setup of a Linux Distribution inside of Windows. You will have to enter a new username and password for your linux terminal and may need to restart.
 Next we will install usbipd. This is a program that allows WSL to see USB devices, such as the ST-Link. Download the package and run the installer. Once this is complete, run the commands `sudo apt install linux-tools-generic hwdata` and `sudo update-alternatives --install /usr/local/bin/usbip usbip /usr/lib/linux-tools/*-generic/usbip 20` on your WSL terminal. [This Link](https://learn.microsoft.com/en-us/windows/wsl/connect-usb) provides more detailed instructions on usbipd installation and setup.
-
+`sudo apt install gcc-arm-none-eabi` for eabi on WSL
 ## Building code
 
 ## Uploading Code
