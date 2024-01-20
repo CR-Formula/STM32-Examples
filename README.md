@@ -26,12 +26,12 @@ Here is a short explination of each of these tools:
     - GCC-Arm-none-eabi: embedded Arm specific build tools and compiler.
     - GDB-Multiarch: adds support for microcontroller debugging
     - STLink-Tools: ST specific tools for developing and uploading embedded code
-5. Finally, we will need to install a handful of VSCode extensions, these give us some tools to upload code to the boards as well as see registers and variables while debugging. These extensions are included in `extensions.json` file in the `.vscode` directory on the `main` branch.
+5. Finally, we will need to install a handful of VSCode extensions, these give us some tools to upload code to the boards as well as see registers and variables while debugging. These extensions are included in [extensions.json](https://github.com/Cyclone-Racing/CR28_Telem/blob/Documentation/.vscode/extensions.json) file in the `.vscode` directory on the `main` branch.
 
 Once youve completed these steps, you are ready to get started developing firmware. The best place to start will be the Microcontroller Reference Manual. Read through the section about the peripheral you are trying to work with.
 
 ## Building code
-In order to build the code, use Make and Makefiles. Open up an Ubuntu terminal and navigate to the project directory. Next, run the command `make`. This will build the code using the instructions in the makefile. Make will only build files that you change, if you would like to rebuild the whole project, then run the command `make clean` before running `make`.
+In order to build the code, use Make and Makefiles. Open up an Ubuntu terminal and navigate to the project directory. Next, run the command `make` in the terminal. This will build the code using the instructions in the makefile. Make will only build files that you change, if you would like to rebuild the whole project, then run the command `make clean` before running `make`.
 
 ## Uploading Code (WIP)
 To upload code to the board, use Cortex-Debug and the ST-Link programmer. The Cortex-Debug extension uses a file in the .vscode directory. There will also need to be additional paths that are added to he Cortex-Debug settings.
