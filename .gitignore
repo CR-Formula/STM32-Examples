@@ -1,14 +1,9 @@
 
 .metadata/
 .vs/
-.vscode/
 .settings/
 Examples/CAN_Test/.settings/
 Examples/DMA_ADC/.settings/
 cmake/
 build/
 Debug/
-CMakeLists.txt
-CMakePresets.json
-vcpkg-configuration.json
-CMakePresets.json
