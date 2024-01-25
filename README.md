@@ -9,6 +9,7 @@ This Repository stores the embedded code for our realtime telemetry system. The 
 - [STM32 Wiki](https://wiki.stmicroelectronics.cn/stm32mcu/wiki/Category:Getting_started_with_STM32_:_STM32_step_by_step)
 - [Embedded Systems Design](https://iowastate.sharepoint.com/sites/CycloneRacingFormulaSAE/Shared%20Documents/Forms/AllItems.aspx?id=%2Fsites%2FCycloneRacingFormulaSAE%2FShared%20Documents%2FElectrical%2FResources%2FEmbedded%20Systems%20Introduction%20to%20Arm%20Cortex%2DM%20Microcontrollers%20Fifth%20Edition%2Epdf&parent=%2Fsites%2FCycloneRacingFormulaSAE%2FShared%20Documents%2FElectrical%2FResources)
 - [Basic Linux Guide](https://www.tecmint.com/free-online-linux-learning-guide-for-beginners/)
+- [C Program Memory](https://www.geeksforgeeks.org/memory-layout-of-c-program/)
 
 ## Dev and Build Tools
 The Firmware for this system is developed in WSL using Arm compliers and make files. To get started, follow the steps below.
