@@ -3,6 +3,44 @@
 
 void SystemClock_Config(void);
 
+void SPI_Config() {
+  SPI1->CFG2 = (0UL << SPI_CFG2_COMM_Pos);
+}
+typedef struct data_struct {
+  float RPM; //RPM Value
+  float TPS; //TPS Value
+  float FOT; //Fuel Open Time Value
+  float IA; //Ignition Angle
+  float Lam; //Lambda
+  float AirT; //Air Temp
+  float CoolT; //Coolent Temp
+  float Lat; //Latitude
+  float Lng; // Longitude  
+  float Speed; //GPS Speed
+  float OilP; //Oil Pressure
+  float FuelP; //Fuel Pressure
+  float FLTemp; //Brake Temps
+  float FRTemp;
+  float RLTemp;
+  float RRTemp;
+  float FRPot; //Suspension Dampeners
+  float FLPot;
+  float RRPot;
+  float RLPot;
+  float BrakeFront; //Brake Pressures
+  float BrakeRear;
+  float BrakeBias; //Brake Bias
+  float AccX; //Acclerometer
+  float AccY;
+  float AccZ;
+  float GyrX; //Gyroscope
+  float GyrY;
+  float GyrZ;
+  float MagX; //Magnetometer
+  float MagY;
+  float MagZ;
+}
+
 /**
   * @brief  The application entry point.
   * @retval int
@@ -11,11 +49,19 @@ int main(void)
 {
   HAL_Init();
   SystemClock_Config();
-  MX_GPIO_Init();
+  HAL_GPIO_Init();
+
+  HAL_Delay(1000);
+  FATFS FatFs;
+  FIL fil;
+  FRESULT fres;
+
+  fres=f_mount(&FatFs, "", 1);
 
   while (1) {
 
   }
+  return 0;
 }
 
 /**
@@ -67,3 +113,7 @@ void SystemClock_Config(void)
     Error_Handler();
   }
 }
+
+
+git config --global user.email "you@example.com"
+  git config --global user.name "Your Name"
