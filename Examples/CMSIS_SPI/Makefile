@@ -57,7 +57,12 @@ Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal.c \
 Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_i2c.c \
 Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_i2c_ex.c \
 Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_exti.c \
-Core/Src/system_stm32h7xx.c  
+Core/Src/system_stm32h7xx.c  \
+Core/Src/diskio.c \
+Core/Src/ff.c \
+Core/Src/ffsystem.c \
+Core/Src/ffunicode.c \
+
 
 # ASM sources
 ASM_SOURCES =  \

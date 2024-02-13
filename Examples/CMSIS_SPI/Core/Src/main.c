@@ -1,12 +1,18 @@
 #include "main.h"
 #include "stm32h743xx.h"
+#include "FatFs/source/ff.h"
+#include <stdio.h>
+#include <string.h>
+
+
+
 
 void SystemClock_Config(void);
 
 void SPI_Config() {
   SPI1->CFG2 = (0UL << SPI_CFG2_COMM_Pos);
 }
-typedef struct data_struct {
+typedef struct {
   float RPM; //RPM Value
   float TPS; //TPS Value
   float FOT; //Fuel Open Time Value
@@ -39,7 +45,8 @@ typedef struct data_struct {
   float MagX; //Magnetometer
   float MagY;
   float MagZ;
-}
+} data_struct;
+data_struct telemetry;
 
 /**
   * @brief  The application entry point.
@@ -49,17 +56,65 @@ int main(void)
 {
   HAL_Init();
   SystemClock_Config();
-  HAL_GPIO_Init();
+  HX_GPIO_Init();
 
   HAL_Delay(1000);
+
   FATFS FatFs;
   FIL fil;
   FRESULT fres;
 
+//open the file system
   fres=f_mount(&FatFs, "", 1);
+  if (fres != FR_OK){
+    myprintf("f_mount error (%i) \r\n", fres);
+    while(1);
+  }
+
+  //get some stats from the SD card
+  DWORD free_clusters, free_sectors, total_sectors;
+
+  FATFS* getFreeFs;
+
+  fres = f_getfree("", &free_clusters, &getFreeFs);
+  if (fres != FR_OK){
+    myprintf("f_getfree error (%i) \r\n", fres);
+    while(1);
+  }
+
+  total_sectors = (getFreeFs->n_fatent - 2) * getFreeFs->csize;
+  free_sectors = free_clusters * getFreeFs->csize;
+
+  myprintf("SD card stats: \r\n%10lu KiB total drive space.\r\n%10lu KiB available.\r\n", total_sectors / 2, free_sectors / 2);
+
+  char readBuf[120];
+  char *ptr = readBuf;
+  int ret;
+
+  fres = f_open(&fil, "test.txt", FA_WRITE | FA_OPEN_ALWAYS | FA_CREATE_ALWAYS);
+  if(fres == FR_OK) {
+    myprintf("File opened successfully. \r\n");
+  } else {
+    myprintf("File open error (%i) \r\n", fres);
+    while(1);
+  }
 
   while (1) {
-
+   ret = sprintf(ptr, "%f, %f, %f, %f, %f, %f, %f, %f,", telemetry.RPM, telemetry.TPS, telemetry.FOT, telemetry.IA, telemetry.Lam, telemetry.AirT, telemetry.CoolT, telemetry.Lat);
+ptr += ret;
+ret = sprintf(ptr, "%f, %f, %f, %f, %f, %f, %f, %f,", telemetry.Lng, telemetry.Speed, telemetry.OilP, telemetry.FuelP, telemetry.FLTemp, telemetry.FRTemp, telemetry.RLTemp, telemetry.RRTemp);
+ptr += ret;
+ret = sprintf(ptr, "%f, %f, %f, %f, %f, %f, %f, %f,", telemetry.FRPot, telemetry.FLPot, telemetry.RRPot, telemetry.RLPot, telemetry.BrakeFront, telemetry.BrakeRear, telemetry.BrakeBias, telemetry.AccX);
+ptr += ret;
+ret = sprintf(ptr, "%f, %f, %f, %f, %f, %f, %f, %f", telemetry.AccY, telemetry.AccZ, telemetry.GyrX, telemetry.GyrY, telemetry.GyrZ, telemetry.MagX, telemetry.MagY, telemetry.MagZ);
+BYTE bytesWrote;
+f_write(&fil, readBuf, strlen(readBuf), &bytesWrote);
+if(fres == FR_OK) {
+  f_printf("File written successfully. Wrote %i bytes to file. \r\n", bytesWrote);
+  }else {
+    myprintf("File write error (%i) \r\n", fres);
+    while(1);
+  }
   }
   return 0;
 }
@@ -113,7 +168,3 @@ void SystemClock_Config(void)
     Error_Handler();
   }
 }
-
-
-git config --global user.email "you@example.com"
-  git config --global user.name "Your Name"
