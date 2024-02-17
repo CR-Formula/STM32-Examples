@@ -1,0 +1,20 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Cortex Debug",
+            "cwd": "${workspaceFolder}",
+            "preLaunchCommands": ["make -j8"],
+            "executable": "./build/CMSIS_UART.elf",
+            "request": "launch",
+            "type": "cortex-debug",
+            "servertype": "stutil",
+            "device": "STM32H743IZ2",
+            "interface": "swd",
+            "svdFile": "/home/alex/Documents/svd/STM32H743.svd",
+        }
+    ]
+}

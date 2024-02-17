@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "stm32h743xx.h": "c"
+    },
+    "cortex-debug.armToolchainPath": "/usr/bin/",
+    "cortex-debug.gdbPath": "/usr/bin/gdb-multiarch",
+    "cortex-debug.stlinkPath": "/usr/bin/st-util",
+}
