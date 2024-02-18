@@ -11,6 +11,9 @@ uint8_t static inline UART3_Init(void) {
     RCC->APB1LENR |= RCC_APB1LENR_USART3EN; // Enable USART3 clock
     USART3->CR1 &= USART_CR1_UE; // Make sure USART3 is disabled to configure
 
+    USART3->CR1 &= ~USART_CR1_OVER8; // Set oversampling to 16
+    USART3->CR1 &= ~USART_CR1_FIFOEN; // Disable FIFO mode
+
     // Set word length to 8 bits '00' in M0 and M1
     USART3->CR1 &= (0UL << USART_CR1_M1_Pos);
     USART3->CR1 &= (0UL << USART_CR1_M0_Pos);
@@ -31,11 +34,14 @@ uint8_t static inline UART3_Init(void) {
 uint8_t static inline UART_SendChar(uint8_t data) {
     // Can only write to TDR when TXE/TXFNF is set
     USART3->CR1 |= USART_CR1_TE; // Enable transmitter
+    while(!(USART3->ISR & USART_ISR_TXE_TXFNF)); // Wait for Transmit Data Register Empty flag
     USART3->TDR = data; // Write to TDR
+    while (!(USART3->ISR & USART_ISR_TXE_TXFNF)); // Wait for Transmit Data Register Empty flag
+    // TXE should be cleared by hardware when data is written to TDR
+    while (!(USART3->ISR & USART_ISR_TC)); // Wait for Transmission Complete flag
 
     // TODO: TXE flag not being cleared
-    while ((USART3->ISR & USART_ISR_TXE_TXFNF)); // Wait for Transmit Data Register Empty flag
-    while (!(USART3->ISR & USART_ISR_TC)); // Wait for Transmission Complete flag
+    // while ((USART3->ISR & USART_ISR_TXE_TXFNF)); // Wait for Transmit Data Register Empty flag
     USART3->CR1 &= ~USART_CR1_TE; // Disable transmitter
     return 0;
 }
