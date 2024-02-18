@@ -14,7 +14,7 @@ This Repository stores the embedded code for our real-time telemetry system. The
 ## Dev and Build Tools
 The Firmware for this system is developed in WSL using Arm compilers and make files. To get started, follow the steps below.
 
-1. Install WSL by opening up a Powershell terminal and running the command `wsl --install`. This command will set up WSL using an Ubuntu Linux distribution. It will ask for you to create a username and password to complete the setup. Once installed, you can access the Ubuntu terminal by searching for Ubuntu in Windows, or it will be available in VSCode once the setup is complete.
+1. Install WSL by opening up a Powershell terminal and running the command `wsl --install -d Ubuntu`. This command will set up WSL using an Ubuntu Linux distribution. It will ask for you to create a username and password to complete the setup. Once installed, you can access the Ubuntu terminal by searching for Ubuntu in Windows, or it will be available in VSCode once the setup is complete.
 
 2. Install [usbipd](https://github.com/dorssel/usbipd-win/releases) from the releases page using the .msi file.
 
