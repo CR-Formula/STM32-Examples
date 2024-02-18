@@ -39,8 +39,28 @@ Once you've completed these steps, you can start developing firmware. The best p
 ## Building code
 In order to build the code, use Make and Makefiles. Open up an Ubuntu terminal and navigate to the project directory. Next, run the command `make` in the terminal. This will build the code using the instructions in the makefile. Make will only build files you change; if you would like to rebuild the whole project, run the command `make clean` before running `make`.
 
-## Uploading Code (WIP)
-To upload code to the board, use Cortex-Debug and the ST-Link programmer. The Cortex-Debug extension uses a file in the .vscode directory. There will also need to be additional paths that are added to he Cortex-Debug settings.
+## Passing a Device to WSL
+In order to use the WSL enviroment, you'll have to pass the target board/debugger into WSL. This involves using the usbipd tool that we installed earlier.
+
+1. If you are on Windows, open up Powershell as an administrator and run `usbipd list`. This will list all of your current USB devices on your computer. Look for the STMircroelectronics device and note the BusID in the left column.
+
+2. If you have never connected this board/debugger to WSL before, or if the ST Link device doesn't say Shared in the right column of the list, run the command `usbipd bind --busid <BUS_ID>` replace `<BUS_ID>` with the ID shown in the above list command. This will share the device to WSL.
+
+3. Once the device is shared, you are able to attach it to WSL by running the command `usbipd attach --busid <BUS_ID> --wsl` again replacing `<BUS_ID>` with the ID of your device. To make sure that this command worked, you are able to open a WSL terminal and run the command `lsusb` which should now show the STMicroelectronics device.
+
+## Uploading and Debugging the Code
+To debug and upload code, we use the Cortex-Debug extension. This extension uses 2 configuration files in the .vscode folder: settings.json and launch.json. Basic versions of these files are provided in the repository and can be modified if needed. You must build the code using the `make` command at least once before you attempt to use the Cortex-Debug configuration.
+
+    - settings.json has 3 important keys: cortex-debug.armToolchainPath, cortex-debug.gdbPath, and cortex-debug.stutilPath. All of these file paths are universal in WSL/Ubuntu and should be the same if you setup your dev enviroment by following the directions above.
+    - launch.json configures the debugging profile for Cortex-Debug. The default values in this file should also work well apart from two: svdFile and device. svdFile is the path to an svd file for the microcontroller that you are using and svd file tells the debugger what peripherials are at what memory addresses and allows for easier debugging. The device will need to match the microcontroller on whichever board you are debugging.
+
+1. Once these files are configured, go to the run and debug window on the left column in VSCode (Looks like a play button with a bug) and you should see an option called Cortex Debug. With the Cortex Debug option selected press the green play button.
+
+2. This will create a debug menu at the top of the screen to control the debug session which gives you options such as step over, step into, and step out as well as reset and end session.
+
+3. At the bottom of the left column, there is also a xPeripherials option. These are the register values of the device you are debugging and are very useful to find issues.
+
+4. Finally, you are able to set breakpoint by clicking the red dot next to the line number you want to place the breakpoint at. This will stop the code while it is running so that you can look at the register values.
 
 # Links
 - [Linktree](https://linktr.ee/cycloneracing)
