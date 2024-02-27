@@ -67,8 +67,8 @@ int main(void)
 //open the file system
   fres=f_mount(&FatFs, "", 1);
   if (fres != FR_OK){
-    myprintf("f_mount error (%i) \r\n", fres);
     while(1);
+    //error occurred while mounting the drive
   }
 
   //get some stats from the SD card
@@ -107,10 +107,10 @@ ptr += ret;
 ret = sprintf(ptr, "%f, %f, %f, %f, %f, %f, %f, %f,", telemetry.FRPot, telemetry.FLPot, telemetry.RRPot, telemetry.RLPot, telemetry.BrakeFront, telemetry.BrakeRear, telemetry.BrakeBias, telemetry.AccX);
 ptr += ret;
 ret = sprintf(ptr, "%f, %f, %f, %f, %f, %f, %f, %f", telemetry.AccY, telemetry.AccZ, telemetry.GyrX, telemetry.GyrY, telemetry.GyrZ, telemetry.MagX, telemetry.MagY, telemetry.MagZ);
-BYTE bytesWrote;
+uint8_t bytesWrote; //edited from BYTE to uint8_t
 f_write(&fil, readBuf, strlen(readBuf), &bytesWrote);
 if(fres == FR_OK) {
-  f_printf("File written successfully. Wrote %i bytes to file. \r\n", bytesWrote);
+  f_printf(&fil, "File written successfully. Wrote %i bytes to file. \r\n", bytesWrote);
   }else {
     myprintf("File write error (%i) \r\n", fres);
     while(1);
