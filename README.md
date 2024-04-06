@@ -1,1 +1,2 @@
-STM32 Examples
+# STM32 Examples
+This repo is used to house working examples for some of the STM32 Code. Each peripherial has it's own branch and development is done on that branch. It can also be used to add code to test the different peripherials. See the Telem repository for the code for the Telemetry System.
