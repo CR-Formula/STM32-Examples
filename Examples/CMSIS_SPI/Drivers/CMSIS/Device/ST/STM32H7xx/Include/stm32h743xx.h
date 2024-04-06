@@ -18257,6 +18257,14 @@ typedef struct
 #define SPI_CFG2_IOSWP_Msk          (0x1UL << SPI_CFG2_IOSWP_Pos)              /*!< 0x00008000 */
 #define SPI_CFG2_IOSWP              SPI_CFG2_IOSWP_Msk                         /*!<Swap functionality of MISO and MOSI pins */
 
+/**
+ * @brief Position of the SPI_CFG2_COMM bit in the SPI configuration register 2.
+ *
+ * This macro defines the position of the SPI_CFG2_COMM bit in the SPI configuration register 2.
+ * The SPI_CFG2_COMM bit is used to configure the communication mode of the SPI peripheral.
+ * It determines whether the SPI operates in full-duplex, half-duplex, or simplex mode.
+ * The position of this bit is 17.
+ */
 #define SPI_CFG2_COMM_Pos           (17U)
 #define SPI_CFG2_COMM_Msk           (0x3UL << SPI_CFG2_COMM_Pos)               /*!< 0x00060000 */
 #define SPI_CFG2_COMM               SPI_CFG2_COMM_Msk                          /*!<COMM [1:0]: SPI Communication Mode*/

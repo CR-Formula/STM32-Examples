@@ -9,8 +9,27 @@
 
 void SystemClock_Config(void);
 
-void SPI_Config() {
-  SPI1->CFG2 = (0UL << SPI_CFG2_COMM_Pos);
+void SPI_Config() 
+/**
+ * to configure:
+ * SPI4_SCK
+ * SPI4_NSS
+ * SPI4_MISO
+ * SPI4_MOSI
+ * 
+ * SPI1_SCK
+ * SPI1_MISO
+ * SPI1_MOSI
+ * 
+ * SPI3_SCK
+ * SPI3_MISO
+ * SPI3_NSS
+ * SPI3_MOSI
+ * 
+ * along with what is required to be configured from RM0433 sheet
+*/
+{
+  SPI1->CFG2 = (0UL << SPI_CFG2_COMM_Pos);  
 }
 typedef struct {
   float RPM; //RPM Value
@@ -56,7 +75,11 @@ int main(void)
 {
   HAL_Init();
   SystemClock_Config();
-  HX_GPIO_Init();
+  MX_GPIO_Init();
+  MX_SPI1_Init();
+  MX_SPI3_Init();
+  MX_SPI4_Init();
+
 
   HAL_Delay(1000);
 
