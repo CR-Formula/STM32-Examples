@@ -14,7 +14,7 @@
             "servertype": "stutil",
             "device": "STM32H743IZ2",
             "interface": "swd",
-            "svdFile": "/home/alex/Documents/svd/STM32H743.svd",
+            "svdFile": "/home/ryanm05/Formula/STM32H743.svd",
         }
     ]
 }

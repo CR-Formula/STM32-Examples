@@ -30,8 +30,8 @@ int main() {
   GPIOB_Init();
   osKernelInitialize();
 
-  BlinkStatusHandle = osThreadNew(BlinkStatusTask, NULL, &BlinkStatus_attributes);
-  UARTHandle = osThreadNew(UARTTask, NULL, &UART_attributes);
+  BlinkStatusHandle = osThreadNew(BlinkStatusTask, 0, &BlinkStatus_attributes);
+  UARTHandle = osThreadNew(UARTTask, 99, &UART_attributes);
 
   osKernelStart();
   
@@ -50,9 +50,7 @@ void BlinkStatusTask(void *argument) {
 void UARTTask(void *argument) {
   while(1) {
     // Send data to UART3
-    for (int i = 0; i < sizeof(data); i++){
-      UART_SendChar(data[i]);
-    }
+    UART_SendString(data);
     osDelay(500);
   }
 }
