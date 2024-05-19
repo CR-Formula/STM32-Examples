@@ -1,0 +1,17 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Cortex Debug",
+            "cwd": "${workspaceFolder}",
+            "executable": "./build/F4_Base.elf",
+            "request": "launch",
+            "type": "cortex-debug",
+            "servertype": "stutil",
+            "device": "STM32F407",
+            "interface": "swd",
+            "preLaunchCommands": ["make -j8"],
+            "svdFile": "${workspaceFolder}/STM32F407.svd",
+        }
+    ]
+}
