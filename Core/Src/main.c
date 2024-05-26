@@ -55,10 +55,26 @@ void TIM2_Init() {
   TIM2->CR1 |= TIM_CR1_CEN; // Enable Timer
 }
 
+void USART2_Init() {
+  RCC->APB1ENR |= RCC_APB1ENR_USART2EN; // Enable USART2 Clock
+  RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN; // Enable GPIO A Clock
+
+  GPIOA->MODER &= ~GPIO_MODER_MODE2 & ~GPIO_MODER_MODE3; // Clear PA2 and PA3
+  GPIOA->MODER |= (0x2 << GPIO_MODER_MODE2_Pos) 
+                | (0x2 << GPIO_MODER_MODE3_Pos); // Set PA2 and PA3 to TX and RX
+
+  GPIOA->OSPEEDR |= (0x2 << GPIO_OSPEEDR_OSPEED2_Pos) 
+                  | (0x2 << GPIO_OSPEEDR_OSPEED3_Pos); // Set PA2 and PA3 to High Speed
+
+  GPIOA->AFR[0] |= (0x7 << GPIO_AFRL_AFSEL2_Pos) 
+                  | (0x7 << GPIO_AFRL_AFSEL3_Pos); // Set PA2 and PA3 to AF7 (USART2)
+}
+
 int main() {
   SysClock_Config();
   LED_Init();
   TIM2_Init();
+  USART2_Init();
 
   while(1) {
     Toggle_Pin(12);
