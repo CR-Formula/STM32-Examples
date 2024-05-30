@@ -1,10 +1,15 @@
 #include "stm32f407xx.h"
 #include "cmsis_os2.h"
+
+#include <stdio.h>
+
 #include "uart.h"
 #include "timer.h"
 #include "gpio.h"
 
 #define HSE_VALUE 8000000U
+
+volatile int adc_value = 0;
 
 void SysClock_Config();
 
@@ -38,12 +43,50 @@ void TIM2_IRQHandler(void) {
   }
 }
 
+/**
+ * @brief Initialize ADC
+ * 
+ */
+void ADC_Init() {
+  RCC->APB2ENR |= RCC_APB2ENR_ADC1EN; // Enable ADC1 Clock
+  RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN | RCC_AHB1ENR_GPIOBEN 
+                | RCC_AHB1ENR_GPIOCEN; // Enable GPIO A, B, and C Clock
+  ADC->CCR |= (0x1 << ADC_CCR_ADCPRE_Pos); // Set ADC Prescaler to 4 (84MHz / 4 = 21MHz)
+  
+  ADC1->CR2 |= ADC_CR2_ADON; // Enable ADC
+
+  // Page 272 for GPIO Configuration
+  GPIOA->MODER &= ~GPIO_MODER_MODE1; // Clear PA1
+  GPIOA->PUPDR &= ~GPIO_PUPDR_PUPDR1; // Clear PA1
+  GPIOA->OSPEEDR &= ~GPIO_OSPEEDR_OSPEED1; // Clear PA1
+  GPIOA->OTYPER &= ~GPIO_OTYPER_OT1; // Clear PA1
+  GPIOA->MODER |= (0x3 << GPIO_MODER_MODE1_Pos); // Set PA1 to Analog Mode
+  GPIOA->PUPDR &= ~GPIO_PUPDR_PUPDR1; // Disable Pull Up/Down Resistors
+
+  ADC1->SQR1 &= ~ADC_SQR1_L; // Set Regular Sequence Length to 1
+  ADC1->SQR3 &= ~ADC_SQR3_SQ1; // Set Regular Sequence 1 to Channel 1
+  ADC1->SQR3 |= (0x1 << ADC_SQR3_SQ1_Pos); // Set Regular Sequence 1 to Channel 1
+}
+
+/**
+ * @brief Read ADC PA1
+ * 
+ * @return int Value of ADC
+ */
+void ADC_Read() {
+  ADC1->CR2 |= ADC_CR2_SWSTART; // Start Conversion
+  while (!(ADC1->SR & ADC_SR_EOC)); // Wait for End of Conversion
+  adc_value = ADC1->DR; // Return the Data Register
+}
+
 int main() {
   uint8_t message[] = "Hello World!\n";
+  uint8_t ADC_Val[16] = {0};
   SysClock_Config();
   LED_Init();
   TIM2_Init();
   USART2_Init();
+  ADC_Init();
 
   while(1) {
     Toggle_Pin(GPIOD, 12);
@@ -52,11 +95,8 @@ int main() {
     Delay_Temp();
     Toggle_Pin(GPIOD, 14);
     Delay_Temp();
-    for (uint16_t i = 0; i < sizeof(message); i++) {
-      USART2->DR = message[i];
-      while (!(USART2->SR & USART_SR_TC));
-    }
-    
+    sprintf(ADC_Val, "ADC: %d\n", adc_value);
+    send_String(ADC_Val);
   }
   return 0;
 }
