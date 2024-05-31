@@ -47,7 +47,9 @@ void static inline send_Byte(uint8_t byte) {
  * @param string String to send
  */
 void static inline send_String(uint8_t *string) {
-  for (uint16_t i = 0; i < sizeof(string); i++) {
+  int i = 0;
+  while (string[i] != '\0') {
     send_Byte(string[i]);
+    i++;
   }
 }

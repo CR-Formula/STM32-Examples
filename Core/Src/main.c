@@ -48,11 +48,9 @@ void TIM2_IRQHandler(void) {
  * 
  */
 void ADC_Init() {
-  RCC->APB2ENR |= RCC_APB2ENR_ADC1EN; // Enable ADC1 Clock
-  RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN | RCC_AHB1ENR_GPIOBEN 
-                | RCC_AHB1ENR_GPIOCEN; // Enable GPIO A, B, and C Clock
   ADC->CCR |= (0x1 << ADC_CCR_ADCPRE_Pos); // Set ADC Prescaler to 4 (84MHz / 4 = 21MHz)
-  
+  RCC->APB2ENR |= RCC_APB2ENR_ADC1EN; // Enable ADC1 Clock
+
   ADC1->CR2 |= ADC_CR2_ADON; // Enable ADC
 
   // Page 272 for GPIO Configuration
@@ -81,7 +79,7 @@ void ADC_Read() {
 
 int main() {
   uint8_t message[] = "Hello World!\n";
-  uint8_t ADC_Val[16] = {0};
+  uint8_t ADC_Val[32];
   SysClock_Config();
   LED_Init();
   TIM2_Init();
@@ -89,12 +87,14 @@ int main() {
   ADC_Init();
 
   while(1) {
-    Toggle_Pin(GPIOD, 12);
-    Delay_Temp();
-    Toggle_Pin(GPIOD, 13);
-    Delay_Temp();
-    Toggle_Pin(GPIOD, 14);
-    Delay_Temp();
+    ADC_Read();
+    if (adc_value > 250) {
+      GPIOD->ODR |= (1 << 12);
+      GPIOD->ODR &= ~(1 << 13);
+    } else {
+      GPIOD->ODR &= ~(1 << 12);
+      GPIOD->ODR |= (1 << 13);
+    }
     sprintf(ADC_Val, "ADC: %d\n", adc_value);
     send_String(ADC_Val);
   }
