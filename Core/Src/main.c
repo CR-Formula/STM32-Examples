@@ -54,16 +54,53 @@ void ADC_Init() {
   ADC1->CR2 |= ADC_CR2_ADON; // Enable ADC
 
   // Page 272 for GPIO Configuration
-  GPIOA->MODER &= ~GPIO_MODER_MODE1; // Clear PA1
-  GPIOA->PUPDR &= ~GPIO_PUPDR_PUPDR1; // Clear PA1
-  GPIOA->OSPEEDR &= ~GPIO_OSPEEDR_OSPEED1; // Clear PA1
-  GPIOA->OTYPER &= ~GPIO_OTYPER_OT1; // Clear PA1
-  GPIOA->MODER |= (0x3 << GPIO_MODER_MODE1_Pos); // Set PA1 to Analog Mode
-  GPIOA->PUPDR &= ~GPIO_PUPDR_PUPDR1; // Disable Pull Up/Down Resistors
+  // Set PA1-PA7 to Analog Mode
+  GPIOA->MODER |= (0x3 << GPIO_MODER_MODE0_Pos) | (0x3 << GPIO_MODER_MODE1_Pos)
+                | (0x3 << GPIO_MODER_MODE2_Pos) | (0x3 << GPIO_MODER_MODE3_Pos)
+                | (0x3 << GPIO_MODER_MODE4_Pos) | (0x3 << GPIO_MODER_MODE5_Pos)
+                | (0x3 << GPIO_MODER_MODE6_Pos) | (0x3 << GPIO_MODER_MODE7_Pos);
+  
+  GPIOB->MODER |= (0x3 << GPIO_MODER_MODE0_Pos) | (0x3 << GPIO_MODER_MODE1_Pos);
 
-  ADC1->SQR1 &= ~ADC_SQR1_L; // Set Regular Sequence Length to 1
-  ADC1->SQR3 &= ~ADC_SQR3_SQ1; // Set Regular Sequence 1 to Channel 1
-  ADC1->SQR3 |= (0x1 << ADC_SQR3_SQ1_Pos); // Set Regular Sequence 1 to Channel 1
+  GPIOC->MODER |= (0x3 << GPIO_MODER_MODE0_Pos) | (0x3 << GPIO_MODER_MODE1_Pos)
+                | (0x3 << GPIO_MODER_MODE2_Pos) | (0x3 << GPIO_MODER_MODE3_Pos)
+                | (0x3 << GPIO_MODER_MODE4_Pos) | (0x3 << GPIO_MODER_MODE5_Pos);
+
+  // Clear Pull Up Pull Down Registers
+  GPIOA->PUPDR &= ~GPIO_PUPDR_PUPDR1 & ~GPIO_PUPDR_PUPDR2 & ~GPIO_PUPDR_PUPDR3
+                & ~GPIO_PUPDR_PUPDR4 & ~GPIO_PUPDR_PUPDR5 & ~GPIO_PUPDR_PUPDR6
+                & ~GPIO_PUPDR_PUPDR7;
+
+  GPIOB->PUPDR &= ~GPIO_PUPDR_PUPDR0 & ~GPIO_PUPDR_PUPDR1;
+
+  GPIOC->PUPDR &= ~GPIO_PUPDR_PUPDR0 & ~GPIO_PUPDR_PUPDR1 & ~GPIO_PUPDR_PUPDR2
+                & ~GPIO_PUPDR_PUPDR3 & ~GPIO_PUPDR_PUPDR4 & ~GPIO_PUPDR_PUPDR5;
+
+  ADC1->SQR1 |= 0xF; // Set Regular Sequence Length to 16
+  
+  // Set Conversion Sequence
+  ADC1->SQR1 |= (0xF << ADC_SQR1_SQ16_Pos) | (0xE << ADC_SQR1_SQ15_Pos)
+              | (0xD << ADC_SQR1_SQ14_Pos) | (0xC << ADC_SQR1_SQ13_Pos);
+  ADC1->SQR2 |= (0xB << ADC_SQR2_SQ12_Pos) | (0xA << ADC_SQR2_SQ11_Pos)
+              | (0x9 << ADC_SQR2_SQ10_Pos) | (0x8 << ADC_SQR2_SQ9_Pos)
+              | (0x7 << ADC_SQR2_SQ8_Pos) | (0x6 << ADC_SQR2_SQ7_Pos);
+  ADC1->SQR3 |= (0x5 << ADC_SQR3_SQ6_Pos) | (0x4 << ADC_SQR3_SQ5_Pos)
+              | (0x3 << ADC_SQR3_SQ4_Pos) | (0x2 << ADC_SQR3_SQ3_Pos)
+              | (0x1 << ADC_SQR3_SQ2_Pos) | (0x0 << ADC_SQR3_SQ1_Pos);
+
+  // DMA Configuration
+  // Use DMA2 Stream 0 Channel 0 for ADC1
+  RCC->AHB1ENR |= RCC_AHB1ENR_DMA2EN; // Enable DMA2 Clock
+  DMA2_Stream0->CR &= ~DMA_SxCR_EN; // Disable DMA Stream
+  DMA2_Stream0->CR |= (0x0 << DMA_SxCR_CHSEL_Pos); // Set Channel to 0
+  DMA2_Stream0->CR |= (0x0 << DMA_SxCR_DIR_Pos); // Set Direction to Peripheral to Memory
+  DMA2_Stream0->CR |= (0x2 << DMA_SxCR_PL_Pos); // Set Priority to High
+  DMA2_Stream0->CR |= (0x1 << DMA_SxCR_PSIZE_Pos); // Set Peripheral Data Size to 16-bits
+  DMA2_Stream0->CR |= (0x1 << DMA_SxCR_MSIZE_Pos); // Set Memory Data Size to 16-bits
+  DMA2_Stream0->CR |= (0x1 << DMA_SxCR_CIRC_Pos); // Set Circular Mode
+
+
+  ADC1->CR2 |= ADC_CR2_CONT; // Set Continuous Conversion Mode
 }
 
 /**
@@ -75,6 +112,13 @@ void ADC_Read() {
   ADC1->CR2 |= ADC_CR2_SWSTART; // Start Conversion
   while (!(ADC1->SR & ADC_SR_EOC)); // Wait for End of Conversion
   adc_value = ADC1->DR; // Return the Data Register
+}
+
+/**
+ * @brief Starts the ADC DMA Conversion
+ * 
+ */
+void ADC_Start() {
 }
 
 int main() {
