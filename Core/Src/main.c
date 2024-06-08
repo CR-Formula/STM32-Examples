@@ -45,7 +45,7 @@ void TIM2_IRQHandler(void) {
 }
 
 int main() {
-  uint16_t ADC_Val[32];
+  uint8_t ADC_Val[32]; // Buffer for print messages
   SysClock_Config();
   LED_Init();
   TIM2_Init();
@@ -62,7 +62,7 @@ int main() {
       GPIOD->ODR |= (1 << 13);
     }
     sprintf(ADC_Val, "%d, %d, %d\n", adc_value[0], adc_value[1], adc_value[2]);
-    send_String(ADC_Val);
+    send_String(USART2, ADC_Val);
   }
   return 0;
 }

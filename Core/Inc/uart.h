@@ -32,11 +32,44 @@ void static inline USART2_Init() {
 }
 
 /**
+ * @brief Initialize USART3
+ * @note Baud rate = 115200, Uses Pins PB10 (Tx) and PB11 (Rx)
+ * 
+ */
+void static inline USART3_Init() {
+  RCC->APB1ENR |= RCC_APB1ENR_USART3EN; // Enable USART3 Clock
+  RCC->AHB1ENR |= RCC_AHB1ENR_GPIOBEN; // Enable GPIO B Clock
+
+  USART3->CR1 &= ~USART_CR1_UE; // Disable USART
+
+  GPIOB->MODER &= ~GPIO_MODER_MODE10 & ~GPIO_MODER_MODE11; // Clear PB10 and PB11
+  GPIOB->MODER |= (0x2 << GPIO_MODER_MODE10_Pos) 
+                | (0x2 << GPIO_MODER_MODE11_Pos); // Set PB10 and PB11 to TX and RX
+
+  GPIOB->OSPEEDR |= (0x2 << GPIO_OSPEEDR_OSPEED10_Pos) 
+                  | (0x2 << GPIO_OSPEEDR_OSPEED11_Pos); // Set PB10 and PB11 to High Speed
+
+  GPIOB->AFR[1] |= (0x7 << GPIO_AFRH_AFSEL10_Pos) 
+                  | (0x7 << GPIO_AFRH_AFSEL11_Pos); // Set PB10 and PB11 to AF7 (USART3)
+
+  USART3->CR1 |= USART_CR1_TE | USART_CR1_RE; // Enable Transmitter and Receiver
+
+  // baud rate = fCK / (8 * (2 - OVER8) * USARTDIV)
+  // Page 989 of Reference Manual
+  // 115200 @ 42MHz = 22.8125
+  USART3->BRR |= (0xD << USART_BRR_DIV_Fraction_Pos);
+  USART3->BRR |= (0x16 << USART_BRR_DIV_Mantissa_Pos);
+
+  USART3->CR1 |= USART_CR1_UE; // Enable USART
+}
+
+/**
  * @brief Sends a byte over USART2
  * 
+ * @param USART USART to use to send message
  * @param byte Byte to send
  */
-void static inline send_Byte(uint8_t byte) {
+void static inline send_Byte(USART_TypeDef* USART, uint8_t byte) {
   USART2->DR = byte;
   while (!(USART2->SR & USART_SR_TC));
 }
@@ -44,12 +77,13 @@ void static inline send_Byte(uint8_t byte) {
 /**
  * @brief send a given string over USART2
  * 
+ * @param USART USART to use to send message
  * @param string String to send
  */
-void static inline send_String(uint8_t *string) {
+void static inline send_String(USART_TypeDef* USART, uint8_t *string) {
   int i = 0;
   while (string[i] != '\0') {
-    send_Byte(string[i]);
+    send_Byte(USART, string[i]);
     i++;
   }
 }

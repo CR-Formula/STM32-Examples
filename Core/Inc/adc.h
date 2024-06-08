@@ -1,7 +1,7 @@
 #include "stm32f407xx.h"
 
 /**
- * @brief Initialize ADC
+ * @brief Initialize ADC1
  * 
  */
 void ADC_Init() {
@@ -25,7 +25,6 @@ void ADC_Init() {
 
   ADC1->CR1 |= ADC_CR1_SCAN; // Enable Scan Mode
   ADC1->CR2 |= ADC_CR2_EOCS; // Enable End of Conversion Selection
-  // ADC1->CR2 |= ADC_CR2_CONT; // Enable Continuous Conversion Mode
 
   ADC1->CR2 |= ADC_CR2_ADON; // Enable ADC
 }
