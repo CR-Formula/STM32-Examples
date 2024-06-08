@@ -70,8 +70,8 @@ void static inline USART3_Init() {
  * @param byte Byte to send
  */
 void static inline send_Byte(USART_TypeDef* USART, uint8_t byte) {
-  USART2->DR = byte;
-  while (!(USART2->SR & USART_SR_TC));
+  USART->DR = byte;
+  while (!(USART->SR & USART_SR_TC));
 }
 
 /**

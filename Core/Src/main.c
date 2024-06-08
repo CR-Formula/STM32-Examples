@@ -49,7 +49,7 @@ int main() {
   SysClock_Config();
   LED_Init();
   TIM2_Init();
-  USART2_Init();
+  USART3_Init();
   ADC_Init();
 
   while(1) {
@@ -62,7 +62,7 @@ int main() {
       GPIOD->ODR |= (1 << 13);
     }
     sprintf(ADC_Val, "%d, %d, %d\n", adc_value[0], adc_value[1], adc_value[2]);
-    send_String(USART2, ADC_Val);
+    send_String(USART3, ADC_Val);
   }
   return 0;
 }
