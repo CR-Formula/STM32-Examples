@@ -10,7 +10,8 @@
 
 #define HSE_VALUE 8000000U
 
-volatile uint16_t adc_value[3];;
+uint16_t adc_value[3];
+volatile uint16_t adc_buffer[16];
 
 void SysClock_Config();
 
@@ -51,17 +52,18 @@ int main() {
   TIM2_Init();
   USART3_Init();
   ADC_Init();
+  DMA_ADC1_Init(adc_buffer);
 
   while(1) {
-    ADC_Read(adc_value);
-    if (adc_value[0] > 250) {
+    // ADC_Read(adc_value);
+    if (adc_buffer[1] > 250) {
       GPIOD->ODR |= (1 << 12);
       GPIOD->ODR &= ~(1 << 13);
     } else {
       GPIOD->ODR &= ~(1 << 12);
       GPIOD->ODR |= (1 << 13);
     }
-    sprintf(ADC_Val, "%d, %d, %d\n", adc_value[0], adc_value[1], adc_value[2]);
+    sprintf(ADC_Val, "%d, %d\n", adc_buffer[1], adc_buffer[5]);
     send_String(USART3, ADC_Val);
   }
   return 0;
