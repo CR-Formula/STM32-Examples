@@ -8,16 +8,25 @@
 void static inline ADC_Init() {
     ADC->CCR |= (0x1 << ADC_CCR_ADCPRE_Pos); // Set ADC Prescaler to 4 (84MHz / 4 = 21MHz)
     RCC->APB2ENR |= RCC_APB2ENR_ADC1EN; // Enable ADC1 Clock
-    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN; // Enable GPIO A Clock
+    // Enable GPIO Clocks
+    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN | RCC_AHB1ENR_GPIOBEN | RCC_AHB1ENR_GPIOCEN;
 
     // Page 272 for GPIO Configuration
     // Set to Analog Mode and disable Pull-up Pull-down
-    GPIOA->MODER |= (0x3 << GPIO_MODER_MODE1_Pos); 
-    GPIOA->PUPDR &= ~GPIO_PUPDR_PUPDR1;
-    GPIOA->MODER |= (0x3 << GPIO_MODER_MODE4_Pos); 
-    GPIOA->PUPDR &= ~GPIO_PUPDR_PUPDR4; 
-    GPIOA->MODER |= (0x3 << GPIO_MODER_MODE5_Pos); 
-    GPIOA->PUPDR &= ~GPIO_PUPDR_PUPDR5; 
+    GPIOA->MODER |= (0x3 << GPIO_MODER_MODE0_Pos) | (0x3 << GPIO_MODER_MODE1_Pos)
+                 | (0x3 << GPIO_MODER_MODE4_Pos) | (0x3 << GPIO_MODER_MODE5_Pos)
+                 | (0x3 << GPIO_MODER_MODE6_Pos) | (0x3 << GPIO_MODER_MODE7_Pos);
+    GPIOB->MODER |= (0x3 << GPIO_MODER_MODE8_Pos) | (0x3 << GPIO_MODER_MODE9_Pos);
+    GPIOC->MODER |= (0x3 << GPIO_MODER_MODE0_Pos) | (0x3 << GPIO_MODER_MODE1_Pos)
+                 | (0x3 << GPIO_MODER_MODE2_Pos) | (0x3 << GPIO_MODER_MODE3_Pos)
+                 | (0x3 << GPIO_MODER_MODE4_Pos) | (0x3 << GPIO_MODER_MODE5_Pos);
+    GPIOA->PUPDR &= ~GPIO_PUPDR_PUPDR0 & ~GPIO_PUPDR_PUPDR1
+                 & ~GPIO_PUPDR_PUPDR4 & ~GPIO_PUPDR_PUPDR5
+                 & ~GPIO_PUPDR_PUPDR6 & ~GPIO_PUPDR_PUPDR7;
+    GPIOB->PUPDR &= ~GPIO_PUPDR_PUPDR8 & ~GPIO_PUPDR_PUPDR9;
+    GPIOC->PUPDR &= ~GPIO_PUPDR_PUPDR0 & ~GPIO_PUPDR_PUPDR1
+                 & ~GPIO_PUPDR_PUPDR2 & ~GPIO_PUPDR_PUPDR3
+                 & ~GPIO_PUPDR_PUPDR4 & ~GPIO_PUPDR_PUPDR5;
 
     ADC1->SQR1 |= (0xF << ADC_SQR1_L_Pos); // Set Regular Sequence Length to 16
     
