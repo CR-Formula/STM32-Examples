@@ -2,7 +2,8 @@
 
 /**
  * @brief Initialize ADC1
- * 
+ * @note Sets up 16 conversions for all 16 channels
+ * @note Ideally used with DMA for continuous conversion
  */
 void static inline ADC_Init() {
     ADC->CCR |= (0x1 << ADC_CCR_ADCPRE_Pos); // Set ADC Prescaler to 4 (84MHz / 4 = 21MHz)
@@ -39,8 +40,8 @@ void static inline ADC_Init() {
 /**
  * @brief Initalize the DMA2 for ADC1
  * 
- * @note Configuration Instructions on page 325 of Reference Manual
- * @param buffer [uint16_t] Buffer to store ADC values
+ * @note Sets up the DMA to transfer 16 16-bit values from ADC1->DR to buffer
+ * @param buffer [uint16_t] Buffer[16] to store ADC values
  */
 void static inline DMA_ADC1_Init(uint16_t* buffer) {
     RCC->AHB1ENR |= RCC_AHB1ENR_DMA2EN; // Enable DMA2 Clock
@@ -79,7 +80,7 @@ void static inline DMA_ADC1_Init(uint16_t* buffer) {
 /**
  * @brief Read ADC PA1
  * 
- * @return int Value of ADC
+ * @param adc_value [uint16_t*] Pointer to store ADC value
  */
 void static inline ADC_Read(uint16_t *adc_value) {
     ADC1->CR2 |= ADC_CR2_SWSTART; // Start Conversion

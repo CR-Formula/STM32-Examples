@@ -3,6 +3,7 @@
 /**
  * @brief Initialize USART2
  * @note Baud rate = 115200
+ * @note Uses Pins PA2 (Tx) and PA3 (Rx)
  */
 void static inline USART2_Init() {
   RCC->APB1ENR |= RCC_APB1ENR_USART2EN; // Enable USART2 Clock
@@ -33,8 +34,8 @@ void static inline USART2_Init() {
 
 /**
  * @brief Initialize USART3
- * @note Baud rate = 115200, Uses Pins PB10 (Tx) and PB11 (Rx)
- * 
+ * @note Baud rate = 115200
+ * @note Uses Pins PB10 (Tx) and PB11 (Rx)
  */
 void static inline USART3_Init() {
   RCC->APB1ENR |= RCC_APB1ENR_USART3EN; // Enable USART3 Clock
@@ -64,10 +65,10 @@ void static inline USART3_Init() {
 }
 
 /**
- * @brief Sends a byte over USART2
+ * @brief Sends a byte over a USART
  * 
- * @param USART USART to use to send message
- * @param byte Byte to send
+ * @param USART [USART_TypeDef*] USART to use to send message
+ * @param byte [uint8_t] Byte to send
  */
 void static inline send_Byte(USART_TypeDef* USART, uint8_t byte) {
   USART->DR = byte;
@@ -75,10 +76,10 @@ void static inline send_Byte(USART_TypeDef* USART, uint8_t byte) {
 }
 
 /**
- * @brief send a given string over USART2
+ * @brief Sends a given string over USART
  * 
- * @param USART USART to use to send message
- * @param string String to send
+ * @param USART [USART_TypeDef*] USART to use to send message
+ * @param string [uint8_t*] String to send
  */
 void static inline send_String(USART_TypeDef* USART, uint8_t *string) {
   int i = 0;

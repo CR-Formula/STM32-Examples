@@ -15,6 +15,11 @@ volatile uint16_t adc_buffer[16];
 
 void SysClock_Config();
 
+/**
+ * @brief Initialize the LED Pins
+ * 
+ * @note LEDs on the STM32F4-Disco board
+ */
 void LED_Init() {
   RCC->AHB1ENR |= RCC_AHB1ENR_GPIODEN; // Enable GPIO D Clock
 
@@ -26,6 +31,12 @@ void LED_Init() {
                 | (0b01 << GPIO_MODER_MODE14_Pos) | (0b01 << GPIO_MODER_MODE15_Pos); // Set LED Pins to output
 }
 
+/**
+ * @brief Bad Delay Function
+ * 
+ * @note DO NOT USE in production code
+ * @note Only for testing
+ */
 void Delay_Temp() {
   // When Using OSDelay();
   // seconds = (SysTick value) / (clock frequency)
@@ -69,6 +80,10 @@ int main() {
   return 0;
 }
 
+/**
+ * @brief Configure the System Clock to 168MHz
+ * 
+ */
 void SysClock_Config() {
   RCC->CR |= RCC_CR_HSEON; // Enable HSE Clock
   while (!(RCC->CR & RCC_CR_HSERDY)); // Wait until HSE is ready
