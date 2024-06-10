@@ -11,10 +11,12 @@
 
 #define HSE_VALUE 8000000U
 
+
 // Global Variables
 /*----------------------------------------------------------------*/
 uint8_t message[64];
 volatile uint16_t adc_buffer[16];
+
 
 // Function Prototypes
 /*----------------------------------------------------------------*/
@@ -22,6 +24,7 @@ void SysClock_Config();
 void ADCRead(void *argument);
 void USART_Print(void *argument);
 void Status_LED(void *argument);
+
 
 // FreeRTOS Threads
 /*----------------------------------------------------------------*/
@@ -120,6 +123,15 @@ int main() {
   return 0;
 }
 
+
+// FreeRTOS Thread Functions
+/*----------------------------------------------------------------*/
+
+/**
+ * @brief Thread for reading and printing ADC values
+ * 
+ * @param argument 
+ */
 void ADCRead(void *argument) {
   while(1) {
     if (adc_buffer[1] > 250) {
@@ -135,6 +147,11 @@ void ADCRead(void *argument) {
   }
 }
 
+/**
+ * @brief Thread for printing message to USART3
+ * 
+ * @param argument 
+ */
 void USART_Print(void *argument) {
   while(1) {
     osDelay(1000);
@@ -143,6 +160,11 @@ void USART_Print(void *argument) {
   }
 }
 
+/**
+ * @brief Thread for blinking the status led
+ * 
+ * @param argument 
+ */
 void Status_LED(void *argument) {
   while(1) {
     osDelay(1000);
