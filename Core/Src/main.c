@@ -11,10 +11,44 @@
 
 #define HSE_VALUE 8000000U
 
-uint16_t adc_value[3];
+// Global Variables
+/*----------------------------------------------------------------*/
+uint8_t message[64];
 volatile uint16_t adc_buffer[16];
 
+// Function Prototypes
+/*----------------------------------------------------------------*/
 void SysClock_Config();
+void ADCRead(void *argument);
+void USART_Print(void *argument);
+void Status_LED(void *argument);
+
+// FreeRTOS Threads
+/*----------------------------------------------------------------*/
+
+// Prints out ADC values to USART3
+osThreadId_t ADC_Read_Handle;
+const osThreadAttr_t ADC_Read_Attr = {
+  .name = "ADCRead",
+  .stack_size = 128 * 4,
+  .priority = osPriorityNormal
+};
+
+// Prints out "Hello World!" to USART3
+osThreadId_t USART_Print_Handle;
+const osThreadAttr_t USART_Print_Attr = {
+  .name = "USART_Print",
+  .stack_size = 128 * 4,
+  .priority = osPriorityNormal
+};
+
+// Blinks the LED on PD14
+osThreadId_t Status_LED_Handle;
+const osThreadAttr_t Status_LED_Attr = {
+  .name = "Status_LED",
+  .stack_size = 128 * 4,
+  .priority = osPriorityNormal
+};
 
 /**
  * @brief Initialize the LED Pins
@@ -57,17 +91,37 @@ void TIM2_IRQHandler(void) {
   }
 }
 
+/**
+ * @brief Main Function
+ * 
+ * @note Initializes the System Clock, Timer 2, USART3, ADC1, and DMA2
+ * @return int 
+ */
 int main() {
-  uint8_t ADC_Val[32]; // Buffer for print messages
-  Sysclock_168(); // Initalize 
+  uint8_t ADC_Val[32];
+  Sysclock_168();
   LED_Init();
   TIM2_Init();
   USART3_Init();
   ADC_Init();
   DMA_ADC1_Init(adc_buffer);
 
+  osKernelInitialize(); // Initialize FreeRTOS
+
+  ADC_Read_Handle = osThreadNew(ADCRead, NULL, &ADC_Read_Attr);
+  USART_Print_Handle = osThreadNew(USART_Print, NULL, &USART_Print_Attr);
+  Status_LED_Handle = osThreadNew(Status_LED, NULL, &Status_LED_Attr);
+
+  osKernelStart(); // Start FreeRTOS
+
   while(1) {
-    // ADC_Read(adc_value);
+    // Should not reach here
+  }
+  return 0;
+}
+
+void ADCRead(void *argument) {
+  while(1) {
     if (adc_buffer[1] > 250) {
       GPIOD->ODR |= (1 << 12);
       GPIOD->ODR &= ~(1 << 13);
@@ -75,8 +129,23 @@ int main() {
       GPIOD->ODR &= ~(1 << 12);
       GPIOD->ODR |= (1 << 13);
     }
-    sprintf(ADC_Val, "%d, %d\n", adc_buffer[1], adc_buffer[5]);
-    send_String(USART3, ADC_Val);
+    sprintf(message, "%d, %d\n", adc_buffer[1], adc_buffer[5]);
+    send_String(USART3, message);
+    osDelay(50);
   }
-  return 0;
+}
+
+void USART_Print(void *argument) {
+  while(1) {
+    osDelay(1000);
+    sprintf(message, "Hello World!\n");
+    send_String(USART3, message);
+  }
+}
+
+void Status_LED(void *argument) {
+  while(1) {
+    osDelay(1000);
+    Toggle_Pin(GPIOD, 14);
+  }
 }
