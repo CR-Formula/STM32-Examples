@@ -99,10 +99,10 @@ void TIM2_IRQHandler(void) {
  * 
  */
 void SPI_Init() {
-  RCC->APB1ENR |= RCC_APB1ENR_SPI2EN; // Enable SPI1 Clock
+  RCC->APB1ENR |= RCC_APB1ENR_SPI2EN; // Enable SPI2 Clock
   RCC->AHB1ENR |= RCC_AHB1ENR_GPIOBEN; // Enable GPIOB Clock
 
-  SPI1->CR1 &= ~SPI_CR1_SPE; // Disable SPI
+  SPI2->CR1 &= ~SPI_CR1_SPE; // Disable SPI
 
   GPIOB->MODER &= ~GPIO_MODER_MODE13 & ~GPIO_MODER_MODE14 
                 & ~GPIO_MODER_MODE15; // Clear PB13, PB14, and PB15
@@ -113,10 +113,16 @@ void SPI_Init() {
                 | (0x5 << GPIO_AFRH_AFSEL14_Pos) 
                 | (0x5 << GPIO_AFRH_AFSEL15_Pos); // Set PB13, PB14, and PB15 to AF5 (SPI1)
 
-  SPI1->CR1 |= (0x0 << SPI_CR1_BR_Pos); // Set Baud Rate to fPCLK/2 = 21MHz
-  SPI1->CR1 |= SPI_CR1_DFF; // Set Data Frame Format to 16-bit
-  
-
+  SPI2->CR1 |= (0x0 << SPI_CR1_BR_Pos); // Set Baud Rate to fPCLK/2 = 21MHz
+  SPI2->CR1 |= SPI_CR1_CPOL; // Set Clock Polarity to 1
+  SPI2->CR1 &= ~SPI_CR1_CPHA; // Set Clock Phase to 1
+  SPI2->CR1 |= SPI_CR1_DFF; // Set Data Frame Format to 16-bit
+  SPI2->CR1 &= ~SPI_CR1_LSBFIRST; // Set MSB First
+  SPI2->CR1 |= SPI_CR1_SSM; // Set Software Slave Management
+  SPI2->CR1 |= SPI_CR1_SSI; // Set Internal Slave Select
+  SPI2->CR2 &= ~SPI_CR2_FRF; // Set Frame Format to Motorola
+  SPI2->CR1 |= SPI_CR1_MSTR; // Set Master Mode
+  SPI2->CR1 |= SPI_CR1_SPE; // Enable SPI
 }
 
 /**
