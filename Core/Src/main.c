@@ -95,6 +95,31 @@ void TIM2_IRQHandler(void) {
 }
 
 /**
+ * @brief 
+ * 
+ */
+void SPI_Init() {
+  RCC->APB1ENR |= RCC_APB1ENR_SPI2EN; // Enable SPI1 Clock
+  RCC->AHB1ENR |= RCC_AHB1ENR_GPIOBEN; // Enable GPIOB Clock
+
+  SPI1->CR1 &= ~SPI_CR1_SPE; // Disable SPI
+
+  GPIOB->MODER &= ~GPIO_MODER_MODE13 & ~GPIO_MODER_MODE14 
+                & ~GPIO_MODER_MODE15; // Clear PB13, PB14, and PB15
+  GPIOB->MODER |= (0x2 << GPIO_MODER_MODE13_Pos) 
+                | (0x2 << GPIO_MODER_MODE14_Pos) 
+                | (0x2 << GPIO_MODER_MODE15_Pos); // Set PB13, PB14, and PB15 to AF
+  GPIOB->AFR[1] |= (0x5 << GPIO_AFRH_AFSEL13_Pos) 
+                | (0x5 << GPIO_AFRH_AFSEL14_Pos) 
+                | (0x5 << GPIO_AFRH_AFSEL15_Pos); // Set PB13, PB14, and PB15 to AF5 (SPI1)
+
+  SPI1->CR1 |= (0x0 << SPI_CR1_BR_Pos); // Set Baud Rate to fPCLK/2 = 21MHz
+  SPI1->CR1 |= SPI_CR1_DFF; // Set Data Frame Format to 16-bit
+  
+
+}
+
+/**
  * @brief Main Function
  * 
  * @note Initializes the System Clock, Timer 2, USART3, ADC1, and DMA2
