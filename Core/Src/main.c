@@ -8,9 +8,11 @@
 #include "timer.h"
 #include "gpio.h"
 #include "adc.h"
+#include "spi.h"
 
 #define HSE_VALUE 8000000U
 
+#define SPI_CS 12
 
 // Global Variables
 /*----------------------------------------------------------------*/
@@ -62,36 +64,6 @@ const osThreadAttr_t Status_LED_Attr = {
 };
 
 /**
- * @brief Initialize the LED Pins
- * 
- * @note LEDs on the STM32F4-Disco board
- */
-void LED_Init() {
-  RCC->AHB1ENR |= RCC_AHB1ENR_GPIODEN; // Enable GPIO D Clock
-
-  // Set LED Pins to Output mode
-  // Pins reset to push pull mode
-  GPIOD->MODER &= ~GPIO_MODER_MODE12 & ~GPIO_MODER_MODE13 
-                & ~GPIO_MODER_MODE14 & ~GPIO_MODER_MODE15; // Clear LED Pins
-  GPIOD->MODER |= (0b01 << GPIO_MODER_MODE12_Pos) | (0b01 << GPIO_MODER_MODE13_Pos) 
-                | (0b01 << GPIO_MODER_MODE14_Pos) | (0b01 << GPIO_MODER_MODE15_Pos); // Set LED Pins to output
-}
-
-/**
- * @brief Bad Delay Function
- * 
- * @note DO NOT USE in production code
- * @note Only for testing
- */
-void Delay_Temp() {
-  // When Using OSDelay();
-  // seconds = (SysTick value) / (clock frequency)
-  for (int i = 0; i < 10000000; i++) {
-    __NOP();
-  }
-}
-
-/**
  * @brief Handle Timer 2 Interrupt
  * 
  */
@@ -100,50 +72,6 @@ void TIM2_IRQHandler(void) {
     TIM2->SR &= ~(TIM_SR_UIF); // Reset the update interrupt flag
     Toggle_Pin(GPIOD, 15); // Toggle the LED output pin.
   }
-}
-
-/**
- * @brief Initialize SPI2
- * 
- */
-void SPI2_Init() {
-  RCC->APB1ENR |= RCC_APB1ENR_SPI2EN; // Enable SPI2 Clock
-  RCC->AHB1ENR |= RCC_AHB1ENR_GPIOBEN; // Enable GPIOB Clock
-
-  SPI2->CR1 &= ~SPI_CR1_SPE; // Disable SPI
-
-  GPIOB->MODER &= ~GPIO_MODER_MODE12 & ~GPIO_MODER_MODE13
-                & ~GPIO_MODER_MODE14 & ~GPIO_MODER_MODE15; // Clear PB13, PB14, and PB15
-  GPIOB->MODER |= (0x2 << GPIO_MODER_MODE12_Pos)
-                | (0x2 << GPIO_MODER_MODE13_Pos) 
-                | (0x2 << GPIO_MODER_MODE14_Pos) 
-                | (0x2 << GPIO_MODER_MODE15_Pos); // Set PB12, PB13, PB14, and PB15 to AF
-  GPIOB->AFR[1] |= (0x5 << GPIO_AFRH_AFSEL12_Pos)
-                | (0x5 << GPIO_AFRH_AFSEL13_Pos) 
-                | (0x5 << GPIO_AFRH_AFSEL14_Pos) 
-                | (0x5 << GPIO_AFRH_AFSEL15_Pos); // Set PB12, PB13, PB14, and PB15 to AF5 (SPI2)
-
-  SPI2->CR1 = (0x4 << SPI_CR1_BR_Pos); // Set Baud Rate to fPCLK/32
-
-  // Set CPOL = 1, SSM to software, SSI to high
-  SPI2->CR1 |= SPI_CR1_CPOL | SPI_CR1_SSM 
-            | SPI_CR1_SSI; // Set CPOL, DFF, SSM, and SSI
-
-  // Set CPHA = 0, MSB First, Frame Format = Motorola, 8-bit Data
-  SPI2->CR1 &= ~SPI_CR1_CPHA & ~SPI_CR1_LSBFIRST
-            & ~SPI_CR2_FRF & ~SPI_CR1_DFF;
-  
-  SPI2->CR1 |= SPI_CR1_MSTR | SPI_CR1_SPE; // Set Master and Enable
-}
-
-uint8_t SPI_Write(SPI_TypeDef* SPI, uint8_t data, uint8_t device) {
-  Toggle_Pin(GPIOB, 12); // Pull GPIOB12 High for CS
-  while (!(SPI->SR & SPI_SR_TXE)); // Wait until TXE is set
-  SPI->DR = data; // Write data to DR
-  while (!(SPI->SR & SPI_SR_RXNE)); // Wait until RXNE is set
-  uint8_t Read = SPI->DR; // Read DR to clear RXNE
-  Toggle_Pin(GPIOB, 12); // Pull GPIOB12 Low for CS
-  return Read;
 }
 
 /**
@@ -220,8 +148,10 @@ void USART_Print(void *argument) {
  * @param argument 
  */
 void SPI_Send(void *argument) {
+  Set_Pin(GPIOB, SPI_CS); // Pull GPIOB12 High for SPI CS
+  uint8_t data = 0x00;
   while(1) {
-    SPI_Write(SPI2, 0xAA, 12);
+    SPI_Write(SPI2, data++, SPI_CS);
     osDelay(100);
   }
 }
