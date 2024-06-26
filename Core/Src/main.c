@@ -14,6 +14,15 @@
 
 #define SPI_CS 12
 
+// Data Frames
+/*----------------------------------------------------------------*/
+// Possible Idea to make Structs for each type of Data Frame used (CAN, SPI, etc)
+// Should go in a defines file as opposed to main
+typedef struct {
+  uint8_t command;
+  uint8_t data;
+} SPI_Frame;
+
 // Global Variables
 /*----------------------------------------------------------------*/
 uint8_t message[64];
@@ -149,9 +158,10 @@ void USART_Print(void *argument) {
  */
 void SPI_Send(void *argument) {
   Set_Pin(GPIOB, SPI_CS); // Pull GPIOB12 High for SPI CS
-  uint8_t data = 0x00;
+  uint8_t frame[] = {0x0F, 0x00};
   while(1) {
-    SPI_Write(SPI2, data++, SPI_CS);
+    SPI_Transmit_Frame(SPI2, frame, sizeof(frame), SPI_CS);
+    frame[1]++;
     osDelay(100);
   }
 }

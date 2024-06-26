@@ -2,7 +2,7 @@
 
 /**
  * @brief Initialize SPI2
- * 
+ * @note CPOL = 1, CPHA = 0, MSB First, 8-bit Data Frame
  */
 void SPI2_Init() {
   RCC->APB1ENR |= RCC_APB1ENR_SPI2EN; // Enable SPI2 Clock
@@ -30,7 +30,7 @@ void SPI2_Init() {
   SPI2->CR1 |= SPI_CR1_CPOL | SPI_CR1_SSM 
             | SPI_CR1_SSI; // Set CPOL, DFF, SSM, and SSI
 
-  // Set CPHA = 0, MSB First, Frame Format = Motorola, 8-bit Data
+  // Set CPHA = 0, MSB First, Frame Format = Motorola, 8-bit Data Frame
   SPI2->CR1 &= ~SPI_CR1_CPHA & ~SPI_CR1_LSBFIRST
             & ~SPI_CR2_FRF & ~SPI_CR1_DFF;
   
@@ -38,20 +38,56 @@ void SPI2_Init() {
 }
 
 /**
- * @brief 
+ * @brief Send a byte over SPI
+ * @note Does not handle CS pin
  * 
  * @param SPI [SPI_TypeDef*] SPI Peripheral to use
  * @param data [uint8_t] Data to write
- * @param device [uint8_t] Chip Select Pin
- * @return uint8_t Data read from shift register
+ * @param CS [uint8_t] Chip Select Pin
+ * @return [uint8_t] Data read from slave shift register
  */
-uint8_t SPI_Write(SPI_TypeDef* SPI, uint8_t data, uint8_t device) {
-  Clear_Pin(GPIOB, device); 
-  GPIOB->ODR &= ~(1 << device); // Pull pin B12 Low for CS
+uint8_t SPI_Write(SPI_TypeDef* SPI, uint8_t data) {
   while (!(SPI->SR & SPI_SR_TXE)); // Wait until TXE is set
   SPI->DR = data; // Write data to Data Register
   while (!(SPI->SR & SPI_SR_RXNE)); // Wait until RXNE is set
   uint8_t Read = SPI->DR; // Read DR to clear RXNE
-  Set_Pin(GPIOB, device); // Set pin B12 High for CS
+  return Read;
+}
+
+/**
+ * @brief Write a register on a SPI device
+ * @note Designed for RFM95W LoRa Module
+ * 
+ * @param SPI [SPI_TypeDef*] SPI Peripheral to use
+ * @param reg [uint8_t] Register Address
+ * @param data [uint8_t] Data to write
+ * @param CS [uint8_t] Chip Select Pin
+ */
+void SPI_Transmit_Frame(SPI_TypeDef* SPI, uint8_t *buf, uint16_t size, uint8_t CS) {
+  Clear_Pin(GPIOB, CS); // Clear pin B12 Low for CS
+  for (int i = 0; i < size; i++) {
+    SPI_Write(SPI, buf[i]);
+  }
+  Set_Pin(GPIOB, CS); // Set pin B12 High for CS
+}
+
+/**
+ * @brief Read a register on a SPI device
+ * @note Designed for RFM95W LoRa Module
+ * TODO: Need to set up read command
+ * 
+ * @param SPI [SPI_TypeDef*] SPI Peripheral to use
+ * @param reg [uint8_t] Register Address
+ * @param CS [uint8_t] Chip Select Pin
+ * @return uint8_t Register Data
+ */
+uint8_t Read_Register(SPI_TypeDef* SPI, uint8_t reg, uint8_t CS) {
+  Clear_Pin(GPIOB, CS); // Clear pin B12 Low for CS
+  while (!(SPI->SR & SPI_SR_TXE)); // Wait until TXE is set
+  // TODO: Need to send read command
+  SPI->DR = reg; // Write data to Data Register
+  while (!(SPI->SR & SPI_SR_RXNE)); // Wait until RXNE is set
+  uint8_t Read = SPI->DR; // Read DR to clear RXNE
+  Set_Pin(GPIOB, CS); // Set pin B12 High for CS
   return Read;
 }
