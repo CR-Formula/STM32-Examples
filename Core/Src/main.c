@@ -1,3 +1,11 @@
+/************************************************
+* @file    main.c 
+* @author  APBashara
+* @date    6/2024
+* 
+* @brief   Program to test drivers with FreeRTOS
+***********************************************/
+
 #include "stm32f407xx.h"
 #include "cmsis_os2.h"
 

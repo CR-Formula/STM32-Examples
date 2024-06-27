@@ -1,3 +1,11 @@
+/************************************************
+* @file    timer.h 
+* @author  APBashara
+* @date    6/2024
+* 
+* @brief   Basic Timer Driver
+***********************************************/
+
 #include "stm32f407xx.h"
 
 /**
