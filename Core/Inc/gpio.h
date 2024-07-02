@@ -3,7 +3,7 @@
 * @author  APBashara
 * @date    6/2024
 * 
-* @brief   Basic GPIO Driver
+* @brief   GPIO Function Prototypes
 ***********************************************/
 
 #include "stm32f407xx.h"
@@ -13,16 +13,7 @@
  * 
  * @note LEDs on the STM32F4-Disco board
  */
-void LED_Init() {
-  RCC->AHB1ENR |= RCC_AHB1ENR_GPIODEN; // Enable GPIO D Clock
-
-  // Set LED Pins to Output mode
-  // Pins reset to push pull mode
-  GPIOD->MODER &= ~GPIO_MODER_MODE12 & ~GPIO_MODER_MODE13 
-                & ~GPIO_MODER_MODE14 & ~GPIO_MODER_MODE15; // Clear LED Pins
-  GPIOD->MODER |= (0x1 << GPIO_MODER_MODE12_Pos) | (0x1 << GPIO_MODER_MODE13_Pos) 
-                | (0x1 << GPIO_MODER_MODE14_Pos) | (0x1 << GPIO_MODER_MODE15_Pos); // Set LED Pins to output
-}
+void LED_Init();
 
 /**
  * @brief Toggle a given GPIO pin on or off
@@ -30,9 +21,7 @@ void LED_Init() {
  * @param GPIO [GPIO_TypeDef*] GPIO Port to use
  * @param pin [uint8_t] Pin to toggle
  */
-void static inline Toggle_Pin(GPIO_TypeDef* GPIO, uint8_t pin) {
-  GPIO->ODR ^= (1 << pin);
-}
+void Toggle_Pin(GPIO_TypeDef* GPIO, uint8_t pin);
 
 /**
  * @brief Set a given GPIO pin high (Set to 1)
@@ -40,9 +29,7 @@ void static inline Toggle_Pin(GPIO_TypeDef* GPIO, uint8_t pin) {
  * @param GPIO [GPIO_TypeDef*] GPIO Port to use
  * @param pin [uint8_t] Pin to set high
  */
-void static inline Set_Pin(GPIO_TypeDef* GPIO, uint8_t pin) {
-  GPIO->ODR |= (1 << pin);
-}
+void Set_Pin(GPIO_TypeDef* GPIO, uint8_t pin);
 
 /**
  * @brief Clear a given GPIO pin (Set to 0)
@@ -50,6 +37,4 @@ void static inline Set_Pin(GPIO_TypeDef* GPIO, uint8_t pin) {
  * @param GPIO [GPIO_TypeDef*] GPIO Port to use
  * @param pin [uint8_t] Pin to set low
  */
-void static inline Clear_Pin(GPIO_TypeDef* GPIO, uint8_t pin) {
-  GPIO->ODR &= ~(1 << pin);
-}
+void Clear_Pin(GPIO_TypeDef* GPIO, uint8_t pin);
