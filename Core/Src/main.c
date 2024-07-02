@@ -134,11 +134,11 @@ int main() {
 void ADCRead(void *argument) {
   while(1) {
     if (adc_buffer[1] > 250) {
-      GPIOD->ODR |= (1 << 12);
-      GPIOD->ODR &= ~(1 << 13);
+      Set_Pin(GPIOD, 12);
+      Clear_Pin(GPIOD, 13);
     } else {
-      GPIOD->ODR &= ~(1 << 12);
-      GPIOD->ODR |= (1 << 13);
+      Clear_Pin(GPIOD, 12);
+      Set_Pin(GPIOD, 13);
     }
     sprintf(message, "%d, %d\n", adc_buffer[1], adc_buffer[5]);
     send_String(USART3, message);
