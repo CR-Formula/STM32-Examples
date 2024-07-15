@@ -10,15 +10,15 @@
 
 /**
  * @brief Initialize I2C1
- * @note 100kHz, 7-bit Addressing
+ * @note FM, 400kHz, 7-bit Addressing
  */
 void I2C1_Init();
 
 /**
- * @brief Write a register on an I2C device
- * @note Designed for MPU6050
+ * @brief Send a data byte over I2C
  * 
- * @param I2C [I2C_TypeDef*] I2C Peripheral to use
- * @param data [uint8_t] Data to write
+ * @param I2C [I2C_TypeDef*] Peripheral to use
+ * @param addr [uint8_t] Address of device [7-bit]
+ * @param data [uint8_t] Data to send [8-bit]
  */
-void I2C_Write(I2C_TypeDef* I2C, uint8_t data);
+void I2C_Write(I2C_TypeDef* I2C, uint8_t addr, uint8_t data);
