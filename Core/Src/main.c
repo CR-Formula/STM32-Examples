@@ -41,7 +41,7 @@ volatile uint16_t adc_buffer[16];
 // Function Prototypes
 /*----------------------------------------------------------------*/
 void SysClock_Config();
-void ADC_Read(void *argument);
+void ADC_Task(void *argument);
 void USART_Print(void *argument);
 void SPI_Send(void *argument);
 void Status_LED(void *argument);
@@ -54,7 +54,7 @@ void I2C_Send(void *argument);
 // Prints out ADC values to USART3
 osThreadId_t ADC_Read_Handle;
 const osThreadAttr_t ADC_Read_Attr = {
-  .name = "ADC_Read",
+  .name = "ADC_Task",
   .stack_size = 128 * 4,
   .priority = osPriorityNormal
 };
@@ -119,7 +119,7 @@ int main() {
 
   osKernelInitialize(); // Initialize FreeRTOS
 
-  ADC_Read_Handle = osThreadNew(ADC_Read, NULL, &ADC_Read_Attr);
+  ADC_Read_Handle = osThreadNew(ADC_Task, NULL, &ADC_Read_Attr);
   USART_Print_Handle = osThreadNew(USART_Print, NULL, &USART_Print_Attr);
   Status_LED_Handle = osThreadNew(Status_LED, NULL, &Status_LED_Attr);
   SPI_Send_Handle = osThreadNew(SPI_Send, NULL, &SPI_Attr);
@@ -142,7 +142,7 @@ int main() {
  * 
  * @param argument 
  */
-void ADC_Read(void *argument) {
+void ADC_Task(void *argument) {
   while(1) {
     if (adc_buffer[1] > 250) {
       Set_Pin(GPIOD, 12);
