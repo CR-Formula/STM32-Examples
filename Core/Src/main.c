@@ -107,7 +107,6 @@ void TIM2_IRQHandler(void) {
  * @return int 
  */
 int main() {
-  uint8_t ADC_Val[32];
   Sysclock_168();
   LED_Init();
   TIM2_Init();
@@ -116,6 +115,8 @@ int main() {
   DMA_ADC1_Init(adc_buffer);
   SPI2_Init();
   I2C1_Init();
+
+  uint8_t ADC_Val[32];
 
   osKernelInitialize(); // Initialize FreeRTOS
 
@@ -193,8 +194,11 @@ void SPI_Send(void *argument) {
 void I2C_Send(void *argument) {
   uint8_t addr = 0x5B;
   uint8_t data = 0x0;
-  I2C_Write(I2C1, addr, data);
-  data++;
+  while(1) {
+    I2C_Write(I2C1, addr, data);
+    data++;
+    osDelay(100);
+  }
 }
 
 /**
