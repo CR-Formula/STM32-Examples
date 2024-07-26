@@ -24,10 +24,11 @@ void I2C1_Init() {
     GPIOB->OSPEEDR |= (0x3 << GPIO_OSPEEDR_OSPEED6_Pos) | (0x3 << GPIO_OSPEEDR_OSPEED7_Pos); // Set PB6 and PB7 to High Speed
     GPIOB->AFR[0] |= (0x4 << GPIO_AFRL_AFSEL6_Pos) | (0x4 << GPIO_AFRL_AFSEL7_Pos); // Set PB6 (SCL) and PB7 (SDA) to AF4
 
-    I2C1->CR1 |= I2C_CR1_ACK; // Enable Acknowledge
+    // I2C1->CR1 |= I2C_CR1_ACK; // Enable Acknowledge
     I2C1->CR2 |= (42u << I2C_CR2_FREQ_Pos); // Set Peripheral Clock to 42MHz
-    I2C1->CCR &= ~I2C_CCR_FS; // Set Fast Mode
-    I2C1->CCR |= (6u << I2C_CCR_CCR_Pos); // Set Clock Control Register to 400kHz
+    I2C1->CCR |= I2C_CCR_FS; // Set Fast Mode
+    I2C1->CCR |= I2C_CCR_DUTY; // Set Fast Mode Duty Cycle to 16/9
+    I2C1->CCR |= (5u << I2C_CCR_CCR_Pos); // Set Clock Control Register to 400kHz
     // Max Rise Time = 300ns, TpCLK = 1/42MHz = 23.8ns
     // (maximum_rise_time / TfPCLK1) + 1
     I2C1->TRISE |= 0xD; // Set Maximum Rise Time
