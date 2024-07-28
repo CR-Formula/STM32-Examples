@@ -12,6 +12,7 @@
  * @brief Configure the System Clock to 168MHz
  * 
  * @note HSE Clock is 8MHz
+ * @note SYSCLK = 168MHz, APB1 = 42MHz, APB2 = 84MHz
  */
 void Sysclock_168() {
     RCC->CR |= RCC_CR_HSEON; // Enable HSE Clock

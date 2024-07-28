@@ -45,6 +45,7 @@ Core/Src/gpio.c \
 Core/Src/spi.c \
 Core/Src/timer.c \
 Core/Src/uart.c \
+Core/Src/i2c.c \
 Core/Src/sysclk.c \
 FATFS/Target/user_diskio.c \
 FATFS/App/fatfs.c \

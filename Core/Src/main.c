@@ -17,6 +17,7 @@
 #include "gpio.h"
 #include "adc.h"
 #include "spi.h"
+#include "i2c.h"
 
 #define HSE_VALUE 8000000U
 
@@ -40,10 +41,11 @@ volatile uint16_t adc_buffer[16];
 // Function Prototypes
 /*----------------------------------------------------------------*/
 void SysClock_Config();
-void ADCRead(void *argument);
+void ADC_Task(void *argument);
 void USART_Print(void *argument);
 void SPI_Send(void *argument);
 void Status_LED(void *argument);
+void I2C_Send(void *argument);
 
 
 // FreeRTOS Threads
@@ -52,7 +54,7 @@ void Status_LED(void *argument);
 // Prints out ADC values to USART3
 osThreadId_t ADC_Read_Handle;
 const osThreadAttr_t ADC_Read_Attr = {
-  .name = "ADCRead",
+  .name = "ADC_Task",
   .stack_size = 128 * 4,
   .priority = osPriorityNormal
 };
@@ -80,6 +82,13 @@ const osThreadAttr_t Status_LED_Attr = {
   .priority = osPriorityNormal
 };
 
+osThreadId_t I2C_Send_Handle;
+const osThreadAttr_t I2C_Attr = {
+  .name = "I2C_Send",
+  .stack_size = 128 * 4,
+  .priority = osPriorityNormal
+};
+
 /**
  * @brief Handle Timer 2 Interrupt
  * 
@@ -98,7 +107,6 @@ void TIM2_IRQHandler(void) {
  * @return int 
  */
 int main() {
-  uint8_t ADC_Val[32];
   Sysclock_168();
   LED_Init();
   TIM2_Init();
@@ -106,13 +114,17 @@ int main() {
   ADC_Init();
   DMA_ADC1_Init(adc_buffer);
   SPI2_Init();
+  I2C1_Init();
+
+  uint8_t ADC_Val[32];
 
   osKernelInitialize(); // Initialize FreeRTOS
 
-  ADC_Read_Handle = osThreadNew(ADCRead, NULL, &ADC_Read_Attr);
+  ADC_Read_Handle = osThreadNew(ADC_Task, NULL, &ADC_Read_Attr);
   USART_Print_Handle = osThreadNew(USART_Print, NULL, &USART_Print_Attr);
   Status_LED_Handle = osThreadNew(Status_LED, NULL, &Status_LED_Attr);
   SPI_Send_Handle = osThreadNew(SPI_Send, NULL, &SPI_Attr);
+  I2C_Send_Handle = osThreadNew(I2C_Send, NULL, &I2C_Attr);
 
   osKernelStart(); // Start FreeRTOS
 
@@ -131,7 +143,7 @@ int main() {
  * 
  * @param argument 
  */
-void ADCRead(void *argument) {
+void ADC_Task(void *argument) {
   while(1) {
     if (adc_buffer[1] > 250) {
       Set_Pin(GPIOD, 12);
@@ -171,6 +183,28 @@ void SPI_Send(void *argument) {
     SPI_Transmit_Frame(SPI2, frame, sizeof(frame), SPI_CS);
     frame[1]++;
     osDelay(100);
+  }
+}
+
+/**
+ * @brief Send a I2C data byte
+ * 
+ * @param argument 
+ */
+void I2C_Send(void *argument) {
+  uint8_t addr = 0x68;
+  uint8_t data[] = {0, 1, 2, 3};
+  uint16_t temp = 0;
+  uint8_t DegC[64];
+  while(1) {
+    I2C_Write(I2C1, addr, data, sizeof(data));
+    osDelay(50);
+    temp = I2C_Read(I2C1, addr, 65) << 8;
+    temp |= I2C_Read(I2C1, addr, 66);
+    temp = temp + 21;
+    sprintf(DegC, "IMU Temp: %d\n", temp);
+    send_String(USART3, DegC);
+    osDelay(50);
   }
 }
 
