@@ -192,12 +192,19 @@ void SPI_Send(void *argument) {
  * @param argument 
  */
 void I2C_Send(void *argument) {
-  uint8_t addr = 0x5B;
-  uint8_t data = 0x0;
+  uint8_t addr = 0x68;
+  uint8_t data[] = {0, 1, 2, 3};
+  uint16_t temp = 0;
+  uint8_t DegC[64];
   while(1) {
-    I2C_Write(I2C1, addr, data);
-    data++;
-    osDelay(100);
+    I2C_Write(I2C1, addr, data, sizeof(data));
+    osDelay(50);
+    temp = I2C_Read(I2C1, addr, 65) << 8;
+    temp |= I2C_Read(I2C1, addr, 66);
+    temp = temp + 21;
+    sprintf(DegC, "IMU Temp: %d\n", temp);
+    send_String(USART3, DegC);
+    osDelay(50);
   }
 }
 
