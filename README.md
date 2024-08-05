@@ -1,2 +1,2 @@
 # STM32 Examples
-This repo is used to house working examples for some of the STM32 Code. Each peripherial has it's own branch and development is done on that branch. It can also be used to add code to test the different peripherials. See the Telem repository for the code for the Telemetry System.
+This repo is used to develop basic drivers for the STM32 peripherals that are used on the team. This repository is purely used for internal development and testing and shows basic examples of how to interact with the drivers. See the Telem repository for the Telemetry Board code. The end goal is to create a git-submodule for the divers.
