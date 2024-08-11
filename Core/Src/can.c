@@ -45,9 +45,7 @@ void CAN1_Init() {
     
     // http://www.bittiming.can-wiki.info/
     // Sample Point at 85.7% Reg Value = 0x001a0005
-    // CAN1->BTR = 0x001a0005; // Set Baud Rate to 500kbps
-    CAN1->BTR |= (6u << CAN_BTR_BRP_Pos) | (11u << CAN_BTR_TS1_Pos) 
-                | (2u << CAN_BTR_TS2_Pos) | (1u << CAN_BTR_SJW_Pos);
+    CAN1->BTR = 0x001a0005; // Set Baud Rate to 500kbps
     // TODO: Loopback Mode For Testing
     CAN1->BTR |= CAN_BTR_LBKM; // Loopback Mode
     CAN1->MCR &= ~CAN_MCR_INRQ; // Exit Initialization Mode
