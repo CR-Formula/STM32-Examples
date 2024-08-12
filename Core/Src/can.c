@@ -6,6 +6,8 @@
 * @brief   CAN Driver Implementation
 ***********************************************/
 
+#include <stddef.h>
+
 #include "stm32f407xx.h"
 #include "can.h"
 
@@ -39,6 +41,9 @@ void CAN1_Init() {
     CAN1->MCR |= CAN_MCR_INRQ; // Request Initialization Mode
     while (!(CAN1->MSR & CAN_MSR_INAK)); // Wait until Initialization Mode is entered
 
+    CAN1->MCR &= ~CAN_MCR_SLEEP; // Exit Sleep Mode
+    while (!(CAN1->MSR & CAN_MSR_SLAK)); // Wait until Sleep Mode is exited
+
     // Configure CAN1
     CAN1->MCR &= ~CAN_MCR_TXFP & ~CAN_MCR_NART & ~CAN_MCR_RFLM 
                 & ~CAN_MCR_TTCM & ~CAN_MCR_ABOM;
@@ -60,6 +65,10 @@ void CAN1_Init() {
  * @return [CAN_Status] Status of Transmission
  */
 CAN_Status CAN_Transmit(CAN_TypeDef* CAN, CAN_Frame* frame) {
+    if (CAN == NULL || frame == NULL) {
+        return CAN_Error;
+    }
+
     uint8_t mailbox = Get_Empty_Mailbox();
     if (mailbox == 0xFFu) {
         return CAN_Mailbox_Error;
@@ -92,6 +101,10 @@ CAN_Status CAN_Transmit(CAN_TypeDef* CAN, CAN_Frame* frame) {
  * @return [CAN_Status] Status of Reception
  */
 CAN_Status CAN_Receive(CAN_TypeDef* CAN, CAN_Frame* frame) {
+    if (CAN == NULL || frame == NULL) {
+        return CAN_Error;
+    }
+
     if ((CAN->RF0R & CAN_RF0R_FMP0) == 0x1) {
         frame->id = (CAN->sFIFOMailBox[0].RIR & CAN_RI0R_STID_Msk) >> CAN_RI0R_STID_Pos;
         
