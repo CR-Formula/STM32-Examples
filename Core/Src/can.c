@@ -11,6 +11,11 @@
 #include "stm32f407xx.h"
 #include "can.h"
 
+/**
+ * @brief Find an empty CAN Transmit mailbox
+ * 
+ * @return [uint8_t] Index of Empty Mailbox 
+ */
 static uint8_t Get_Empty_Mailbox() {
     if (CAN1->TSR & CAN_TSR_TME0) {
         return 0u;
@@ -56,6 +61,11 @@ void CAN1_Init() {
     CAN1->MCR &= ~CAN_MCR_INRQ; // Exit Initialization Mode
     while (CAN1->MSR & CAN_MSR_INAK); // Wait until Normal Mode is entered
 }
+
+/*
+    TODO:   Seperate out the CAN init and CAN start
+            Add CAN State Machine
+*/
 
 /**
  * @brief Transmit a CAN Frame

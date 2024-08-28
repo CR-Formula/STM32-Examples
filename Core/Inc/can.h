@@ -20,6 +20,15 @@ typedef enum {
     CAN_Mailbox_Error
 } CAN_Status;
 
+typedef enum {
+    CAN_State_Error,
+    CAN_State_Reset,
+    CAN_State_Ready,
+    CAN_State_Listening,
+    CAN_State_Transmitting,
+    CAN_State_Sleep
+} CAN_State;
+
 typedef struct {
     uint16_t id; // 11-bit ID
     uint8_t dlc; // Data Length Code
