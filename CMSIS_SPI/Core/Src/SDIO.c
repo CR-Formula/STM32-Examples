@@ -51,7 +51,7 @@ static uint32_t BufCnt=0;
 #define SD2UM         (0x02)
 
 
-void SD_LowLevel_Init(void) {
+void SDIO_LowLevel_Config(void) {
   uint32_t tempreg;
   
   GPIO_InitTypeDef  GPIO_InitStructure;
@@ -87,8 +87,7 @@ void SD_LowLevel_Init(void) {
   //Enable the SDIO APB2 Clock
   RCC_APB2PeriphClockCmd(RCC_APB2Periph_SDIO, ENABLE);
 
-  // Enable the DMA2 Clock
-  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA2, ENABLE);
+  // DMA2 Clock is not needed for this configuration
   
   //Initialize the SDIO (with initial <400Khz Clock)
   tempreg=0;  //Reset value
@@ -102,7 +101,7 @@ void SD_LowLevel_Init(void) {
   
 }
 
-void SD_Init(void){
+void SDIO_Init(void){
   //uint32_t data;
   uint32_t response;
   uint32_t TimeOut=0xFFFF;
