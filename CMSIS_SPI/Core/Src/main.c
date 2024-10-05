@@ -5,30 +5,24 @@
 #include <ff.h>
 
 
+//4 bit data bus
 
+void SystemClock_Config(void); //168 MHz Clk speed, APB2 speed 84 MHz
 
-void SystemClock_Config(void);
-
-void SPI_Config() 
+void SDIO_Config() 
 /**
- * to configure:
- * SPI4_SCK
- * SPI4_NSS
- * SPI4_MISO
- * SPI4_MOSI
+ * SDIO D0
+ * SDIO D1
+ * SDIO D2
+ * SDIO D3
+ * SDIO CK
  * 
- * SPI1_SCK
- * SPI1_MISO
- * SPI1_MOSI
- * 
- * SPI3_SCK
- * SPI3_MISO
- * SPI3_NSS
- * SPI3_MOSI
- * 
- * along with what is required to be configured from RM0433 sheet
+ * SDIP_CMD
+ *
+ * along with what is required to be configured from RM0090 sheet, page 1077 quick reference
 */
 {
+  //start SDIO config here
   SPI1->CFG2 = (0UL << SPI_CFG2_COMM_Pos);  
 }
 typedef struct {
@@ -76,9 +70,7 @@ int main(void)
   HAL_Init();
   SystemClock_Config();
   MX_GPIO_Init();
-  MX_SPI1_Init();
-  MX_SPI3_Init();
-  MX_SPI4_Init();
+  SDIO_Config();
 
 
   HAL_Delay(1000);
