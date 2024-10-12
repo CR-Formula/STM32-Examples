@@ -8,23 +8,10 @@
 //4 bit data bus
 
 void SystemClock_Config(void); //168 MHz Clk speed, APB2 speed 84 MHz
+//GPIO Config enable
 
-void SDIO_Config() 
-/**
- * SDIO D0
- * SDIO D1
- * SDIO D2
- * SDIO D3
- * SDIO CK
- * 
- * SDIP_CMD
- *
- * along with what is required to be configured from RM0090 sheet, page 1077 quick reference
-*/
-{
-  //start SDIO config here
-  SPI1->CFG2 = (0UL << SPI_CFG2_COMM_Pos);  
-}
+void SDIO_LowLevel_Config();
+
 typedef struct {
   float RPM; //RPM Value
   float TPS; //TPS Value
